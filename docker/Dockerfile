@@ -72,6 +72,10 @@ FROM node:${NODE_VERSION} AS api
 RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 WORKDIR /app
 
+# OCR fallback dependencies for image-based PDFs (optional, controlled by env flags)
+# IMPORTANT: install language data package explicitly (eng.traineddata).
+RUN apk add --no-cache tesseract-ocr tesseract-ocr-data-eng poppler-utils
+
 COPY --from=builder /app /app
 
 # Directorio para el CSV de allowlist (se monta como volumen en compose)

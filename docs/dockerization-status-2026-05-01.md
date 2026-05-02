@@ -74,6 +74,8 @@ Dejar el proyecto ejecutando en local con Docker, validar login + allowlist + mo
 
 ## Roadmap acordado (siguiente sesion)
 
+> Roadmap vivo actualizado en: `docs/roadmap.md`
+
 1. Validacion funcional final de CV upload + extraction + AI en varios casos (PDF, DOCX).
 2. Decidir estrategia futura de storage:
    - mantener local para dev
@@ -87,6 +89,13 @@ Dejar el proyecto ejecutando en local con Docker, validar login + allowlist + mo
    - claves `live`.
 5. Rotacion de credenciales usadas en pruebas (recomendado).
 6. Actualizar documentacion principal (`README.md`, `SPEC.md`, `replit.md`) para reflejar estado post-refactor.
+7. Mejorar analisis IA de CV para que se alinee al puesto concreto:
+   - prompt contextual con titulo/departamento/ubicacion/descripcion de la vacante
+   - nuevos campos de salida: `fitForPosition`, `matchScore`, `matchingSkills`, `missingSkills`, `reasoning`
+   - UI con compatibilidad legacy para analisis historicos (`fitForFinancialServices`, `suggestedRating`).
+8. Añadir fallback OCR opcional para PDFs image-based en extraccion de texto:
+   - activable por `CV_OCR_FALLBACK_ENABLED=true`
+   - parametros de control por entorno: idioma, timeout, maximo de paginas y umbral minimo de texto.
 
 ## Comandos utiles para retomar manana
 

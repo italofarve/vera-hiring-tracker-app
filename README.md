@@ -33,6 +33,7 @@ docker compose --env-file .env up -d
 
 ## Documentacion
 
+- Roadmap vivo (fuente principal): `docs/roadmap.md`
 - Estado de dockerizacion: `docs/dockerization-status-2026-05-01.md`
 - Especificacion tecnica ampliada: `SPEC.md`
 - Guia historica del prototipo/migracion: `replit.md`

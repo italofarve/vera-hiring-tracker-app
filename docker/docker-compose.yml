@@ -54,6 +54,11 @@ services:
       AI_INTEGRATIONS_OPENAI_BASE_URL: ${AI_INTEGRATIONS_OPENAI_BASE_URL:-https://api.openai.com/v1}
       CV_STORAGE_PROVIDER: ${CV_STORAGE_PROVIDER:-local}
       LOCAL_CV_STORAGE_DIR: ${LOCAL_CV_STORAGE_DIR:-/app/uploads}
+      CV_OCR_FALLBACK_ENABLED: ${CV_OCR_FALLBACK_ENABLED:-false}
+      CV_OCR_MIN_TEXT_LENGTH: ${CV_OCR_MIN_TEXT_LENGTH:-40}
+      CV_OCR_TIMEOUT_MS: ${CV_OCR_TIMEOUT_MS:-15000}
+      CV_OCR_LANG: ${CV_OCR_LANG:-eng}
+      CV_OCR_MAX_PAGES: ${CV_OCR_MAX_PAGES:-5}
       # Allowlist desde Google Sheets fallará silenciosamente sin Replit;
       # el código cae al CSV automáticamente.
       ALLOWED_EMAILS_SHEET_ID: ${ALLOWED_EMAILS_SHEET_ID:-}

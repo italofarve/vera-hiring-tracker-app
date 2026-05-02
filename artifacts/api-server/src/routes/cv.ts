@@ -3,9 +3,10 @@ import multer from "multer";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { extname, join } from "node:path";
 import { db } from "@workspace/db";
-import { candidatesTable } from "@workspace/db/schema";
+import { candidatesTable, positionsTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
+import { extractPdfTextWithOcr } from "../lib/pdfOcr";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import mammoth from "mammoth";
 // pdf-parse is CJS-only; use require at runtime (globalThis.require is set by the build banner)
@@ -18,6 +19,11 @@ const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 const objectStorage = new ObjectStorageService();
 const cvStorageProvider = process.env.CV_STORAGE_PROVIDER || "object-storage";
 const localCvStorageDir = process.env.LOCAL_CV_STORAGE_DIR || "/app/uploads";
+const cvOcrFallbackEnabled = (process.env.CV_OCR_FALLBACK_ENABLED || "false").toLowerCase() === "true";
+const cvOcrMinTextLength = Number(process.env.CV_OCR_MIN_TEXT_LENGTH || 40);
+const cvOcrTimeoutMs = Number(process.env.CV_OCR_TIMEOUT_MS || 15000);
+const cvOcrLang = process.env.CV_OCR_LANG || "eng";
+const cvOcrMaxPages = Number(process.env.CV_OCR_MAX_PAGES || 5);
 
 function getUploadExtension(file: Express.Multer.File): string {
   const byName = extname(file.originalname || "").toLowerCase();
@@ -118,12 +124,44 @@ router.get("/candidates/:id/cv-text", async (req: Request, res: Response): Promi
   }
 
   let text = "";
+  let ocrAttempted = false;
+  let ocrFailureReason = "";
 
   if (contentType.includes("pdf") || candidate.cvPath.toLowerCase().endsWith(".pdf")) {
+    let pdfParseFailed = false;
     try {
       const parsed = await pdfParse(fileBuffer);
       text = parsed.text;
     } catch {
+      pdfParseFailed = true;
+    }
+
+    const normalizedPdfText = text.replace(/\s+/g, " ").trim();
+    const shouldRunOcrFallback =
+      cvOcrFallbackEnabled && (pdfParseFailed || normalizedPdfText.length < cvOcrMinTextLength);
+
+    if (shouldRunOcrFallback) {
+      ocrAttempted = true;
+      try {
+        const ocrResult = await extractPdfTextWithOcr(fileBuffer, {
+          lang: cvOcrLang,
+          maxPages: cvOcrMaxPages,
+          timeoutMs: cvOcrTimeoutMs,
+        });
+        if (ocrResult.text.length > normalizedPdfText.length) {
+          text = ocrResult.text;
+        }
+      } catch (err) {
+        ocrFailureReason = err instanceof Error ? err.message : "unknown OCR error";
+        if (pdfParseFailed) {
+          res.status(422).json({
+            error:
+              `Could not extract text from PDF. The file may be image-based or corrupted. OCR fallback failed: ${ocrFailureReason}`,
+          });
+          return;
+        }
+      }
+    } else if (pdfParseFailed) {
       res.status(422).json({ error: "Could not extract text from PDF. The file may be image-based or corrupted." });
       return;
     }
@@ -147,7 +185,10 @@ router.get("/candidates/:id/cv-text", async (req: Request, res: Response): Promi
   text = text.replace(/\s+/g, " ").trim();
 
   if (text.length < 20) {
-    res.status(422).json({ error: "The CV file appears to be empty or image-based. Please paste the text manually." });
+    const ocrHint = ocrAttempted
+      ? ` OCR was attempted${ocrFailureReason ? ` but failed: ${ocrFailureReason}` : " but did not find readable text"}.`
+      : "";
+    res.status(422).json({ error: `The CV file appears to be empty or image-based. Please paste the text manually.${ocrHint}` });
     return;
   }
 
@@ -167,7 +208,41 @@ router.post("/candidates/:id/analyze-cv", async (req: Request, res: Response): P
     return;
   }
 
+  let position: typeof positionsTable.$inferSelect | undefined;
+  if (candidate.positionId != null) {
+    [position] = await db
+      .select()
+      .from(positionsTable)
+      .where(eq(positionsTable.id, candidate.positionId));
+  }
+
+  const positionBlock = position
+    ? `You are evaluating this candidate FOR THIS SPECIFIC POSITION:
+
+POSITION TITLE: ${position.title}
+DEPARTMENT: ${position.department}
+LOCATION: ${position.location}
+TYPE: ${position.type}
+DESCRIPTION: ${position.description ?? "(no description provided)"}
+
+Your job is to assess HOW WELL THE CANDIDATE'S CV MATCHES THIS POSITION'S REQUIREMENTS, not to give a generic financial-services assessment.`
+    : `You are evaluating this candidate for a generic role at Vera (a global financial institution). The candidate has no specific position assigned, so assess overall fit for the financial services sector.`;
+
+  const fitFieldsBlock = position
+    ? `  "fitForPosition": "High | Medium | Low",
+  "matchScore": number between 0 and 100 (0 = no match at all, 100 = perfect match for THIS position),
+  "matchingSkills": ["skills from the CV that DIRECTLY match the position requirements"],
+  "missingSkills": ["requirements of the position that are NOT visible in the CV"],
+  "reasoning": "2-3 sentence explanation of why the candidate matches (or not) THIS position",`
+    : `  "fitForPosition": "High | Medium | Low",
+  "matchScore": number between 0 and 100,
+  "matchingSkills": ["general strengths relevant to financial services"],
+  "missingSkills": ["gaps relevant to financial services"],
+  "reasoning": "2-3 sentence explanation focused on financial services fit",`;
+
   const prompt = `You are an expert HR recruiter at Vera, a global financial institution. Analyze the following CV and provide a structured assessment in JSON format.
+
+${positionBlock}
 
 CV Content:
 ${cvText.slice(0, 8000)}
@@ -181,15 +256,14 @@ Respond with a JSON object (no markdown, no code fences) with these fields:
   "languages": ["language1", "language2"],
   "strengths": ["strength1", "strength2", "strength3"],
   "areasToExplore": ["area1", "area2"],
-  "suggestedRating": number between 1 and 5,
-  "fitForFinancialServices": "High | Medium | Low",
+${fitFieldsBlock}
   "recommendedNextStep": "string"
 }`;
 
   const completion = await openai.chat.completions.create({
     model: "gpt-5.1",
     messages: [{ role: "user", content: prompt }],
-    max_completion_tokens: 1024,
+    max_completion_tokens: 1500,
   });
 
   const raw = completion.choices[0]?.message?.content ?? "{}";

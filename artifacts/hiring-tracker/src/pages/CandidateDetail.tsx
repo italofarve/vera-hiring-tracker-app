@@ -224,17 +224,33 @@ function CvSection({ candidateId }: { candidateId: number }) {
                   <p className="font-semibold text-foreground">{String(cvAnalysis.yearsExperience)} years</p>
                 </div>
               )}
-              {typeof cvAnalysis.fitForFinancialServices === "string" && (
+              {typeof cvAnalysis.fitForPosition === "string" && (
                 <div className="p-3 bg-muted/40 rounded-lg">
-                  <p className="text-xs text-muted-foreground">Finance Fit</p>
+                  <p className="text-xs text-muted-foreground">Position Fit</p>
+                  <p className={`font-semibold ${cvAnalysis.fitForPosition === "High" ? "text-emerald-600" : cvAnalysis.fitForPosition === "Medium" ? "text-amber-600" : "text-red-600"}`}>
+                    {cvAnalysis.fitForPosition}
+                  </p>
+                </div>
+              )}
+              {typeof cvAnalysis.matchScore === "number" && (
+                <div className="p-3 bg-muted/40 rounded-lg">
+                  <p className="text-xs text-muted-foreground">Match Score</p>
+                  <p className={`font-semibold ${cvAnalysis.matchScore >= 75 ? "text-emerald-600" : cvAnalysis.matchScore >= 50 ? "text-amber-600" : "text-red-600"}`}>
+                    {cvAnalysis.matchScore}/100
+                  </p>
+                </div>
+              )}
+              {typeof cvAnalysis.fitForFinancialServices === "string" && typeof cvAnalysis.fitForPosition !== "string" && (
+                <div className="p-3 bg-muted/40 rounded-lg">
+                  <p className="text-xs text-muted-foreground">Finance Fit (legacy)</p>
                   <p className={`font-semibold ${cvAnalysis.fitForFinancialServices === "High" ? "text-emerald-600" : cvAnalysis.fitForFinancialServices === "Medium" ? "text-amber-600" : "text-red-600"}`}>
                     {cvAnalysis.fitForFinancialServices}
                   </p>
                 </div>
               )}
-              {typeof cvAnalysis.suggestedRating === "number" && (
+              {typeof cvAnalysis.suggestedRating === "number" && typeof cvAnalysis.matchScore !== "number" && (
                 <div className="p-3 bg-muted/40 rounded-lg">
-                  <p className="text-xs text-muted-foreground">Suggested Rating</p>
+                  <p className="text-xs text-muted-foreground">Suggested Rating (legacy)</p>
                   <p className="font-semibold text-foreground">{cvAnalysis.suggestedRating}/5</p>
                 </div>
               )}
@@ -245,6 +261,32 @@ function CvSection({ candidateId }: { candidateId: number }) {
                 </div>
               )}
             </div>
+            {typeof cvAnalysis.reasoning === "string" && cvAnalysis.reasoning.length > 0 && (
+              <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
+                <p className="text-xs font-semibold text-purple-700 mb-1">Why this fit?</p>
+                <p className="text-sm text-foreground">{cvAnalysis.reasoning}</p>
+              </div>
+            )}
+            {Array.isArray(cvAnalysis.matchingSkills) && cvAnalysis.matchingSkills.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-emerald-700 mb-1.5">Matching Skills</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {(cvAnalysis.matchingSkills as string[]).map(s => (
+                    <span key={s} className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">✓ {s}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {Array.isArray(cvAnalysis.missingSkills) && cvAnalysis.missingSkills.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-red-700 mb-1.5">Missing Skills</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {(cvAnalysis.missingSkills as string[]).map(s => (
+                    <span key={s} className="text-xs bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-full">✗ {s}</span>
+                  ))}
+                </div>
+              </div>
+            )}
             {Array.isArray(cvAnalysis.topSkills) && cvAnalysis.topSkills.length > 0 && (
               <div>
                 <p className="text-xs font-medium text-foreground mb-1.5">Top Skills</p>
