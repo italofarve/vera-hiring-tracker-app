@@ -26,6 +26,8 @@ COPY tsconfig.base.json tsconfig.json ./
 # Copiar TODOS los package.json (sin código fuente) para resolver el grafo de deps
 COPY artifacts/api-server/package.json ./artifacts/api-server/
 COPY artifacts/hiring-tracker/package.json ./artifacts/hiring-tracker/
+COPY artifacts/vera-pitch-deck/package.json ./artifacts/vera-pitch-deck/
+COPY artifacts/vera-video-explainer/package.json ./artifacts/vera-video-explainer/
 COPY scripts/package.json ./scripts/
 COPY lib/api-spec/package.json ./lib/api-spec/
 COPY lib/api-zod/package.json ./lib/api-zod/
@@ -49,6 +51,8 @@ WORKDIR /app
 COPY lib ./lib
 COPY artifacts/api-server ./artifacts/api-server
 COPY artifacts/hiring-tracker ./artifacts/hiring-tracker
+COPY artifacts/vera-pitch-deck ./artifacts/vera-pitch-deck
+COPY artifacts/vera-video-explainer ./artifacts/vera-video-explainer
 COPY scripts ./scripts
 
 # Build api-server → artifacts/api-server/dist/index.mjs
@@ -58,10 +62,10 @@ RUN pnpm --filter @workspace/api-server run build
 # Vite necesita VITE_CLERK_PUBLISHABLE_KEY en build time (se hornea en el bundle)
 ARG VITE_CLERK_PUBLISHABLE_KEY=""
 ENV NODE_ENV=production
-ENV PORT=80
-ENV BASE_PATH=/
 ENV VITE_CLERK_PUBLISHABLE_KEY=${VITE_CLERK_PUBLISHABLE_KEY}
-RUN pnpm --filter @workspace/hiring-tracker run build
+RUN PORT=80 BASE_PATH=/ pnpm --filter @workspace/hiring-tracker run build
+RUN PORT=80 BASE_PATH=/vera-pitch-deck/ pnpm --filter @workspace/vera-pitch-deck run build
+RUN PORT=80 BASE_PATH=/vera-video-explainer/ pnpm --filter @workspace/vera-video-explainer run build
 
 # -----------------------------------------------------------------------------
 # Stage: api (RUNTIME del backend)
@@ -97,6 +101,8 @@ CMD ["sh", "-c", "pnpm --filter @workspace/db run push-force && node --enable-so
 FROM nginx:alpine AS web
 
 COPY --from=builder /app/artifacts/hiring-tracker/dist/public /usr/share/nginx/html
+COPY --from=builder /app/artifacts/vera-pitch-deck/dist/public /usr/share/nginx/html/vera-pitch-deck
+COPY --from=builder /app/artifacts/vera-video-explainer/dist/public /usr/share/nginx/html/vera-video-explainer
 COPY docker/nginx-web.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80

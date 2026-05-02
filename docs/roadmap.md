@@ -15,6 +15,9 @@ Ultima actualizacion: 2026-05-02
    - activacion por flag de entorno
    - soporte en backend y Docker (`tesseract` + `poppler-utils` + datos `eng`).
 6. Documentacion base actualizada (`README.md`, `SPEC.md`, `replit.md`) y creacion de este roadmap vivo.
+7. Integracion de artifacts opcionales en Docker web para evitar enlaces rotos:
+   - `vera-pitch-deck` publicado en `/vera-pitch-deck/`
+   - `vera-video-explainer` publicado en `/vera-video-explainer/`.
 
 ## En curso / inmediato
 

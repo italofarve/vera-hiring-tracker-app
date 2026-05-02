@@ -32,10 +32,15 @@
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
         X-Content-Type-Options "nosniff"
-        X-Frame-Options "DENY"
         Referrer-Policy "strict-origin-when-cross-origin"
         # Caddy añade el de servidor por defecto, ocultamos
         -Server
+    }
+
+    # El pitch deck renderiza slides en un iframe same-origin.
+    # Usamos SAMEORIGIN globalmente para permitir esa navegación interna.
+    header {
+        X-Frame-Options "SAMEORIGIN"
     }
 }
 
