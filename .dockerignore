@@ -1,0 +1,62 @@
+# Git / SCM
+.git
+.gitignore
+.gitattributes
+
+# Replit-specific
+.replit
+.replit-artifact
+.local
+.upm
+replit.nix
+
+# Node
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/.cache
+**/.vite
+
+# Build artifacts that should be regenerated inside the image
+artifacts/api-server/dist
+artifacts/hiring-tracker/dist
+lib/*/dist
+lib/*/tsconfig.tsbuildinfo
+
+# Environment and secrets — never bake into image
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs
+
+# Test outputs
+coverage
+.nyc_output
+
+# Docker (no need to recurse into itself)
+docker
+!docker/nginx-web.conf
+
+# Project tasks / scratchpads
+.local/session_plan.md
+.local/scratchpad.md
+
+# Optional artifacts not needed in production
+artifacts/mockup-sandbox
+artifacts/vera-pitch-deck
+artifacts/vera-video-explainer
+
+# Documentation (not needed in image)
+docs
+*.md
+!SPEC.md

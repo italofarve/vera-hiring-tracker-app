@@ -1,0 +1,31 @@
+kind = "video"
+previewPath = "/vera-video-explainer/"
+title = "Vera Hiring Tracker — Vídeo Explicativo"
+version = "1.0.0"
+id = "artifacts/vera-video-explainer"
+router = "path"
+
+[[integratedSkills]]
+name = "video-js"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/vera-video-explainer/" ]
+localPort = 20900
+
+[services.development]
+run = "pnpm --filter @workspace/vera-video-explainer run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/vera-video-explainer", "run", "build" ]
+publicDir = "artifacts/vera-video-explainer/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20900"
+BASE_PATH = "/vera-video-explainer/"

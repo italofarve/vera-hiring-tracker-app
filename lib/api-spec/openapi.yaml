@@ -1,0 +1,915 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Hiring Tracker API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: candidates
+    description: Candidate management
+  - name: positions
+    description: Job position management
+  - name: interviews
+    description: Interview scheduling and management
+  - name: feedback
+    description: Interview feedback
+  - name: dashboard
+    description: Dashboard and analytics
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /positions:
+    get:
+      operationId: listPositions
+      tags: [positions]
+      summary: List all positions
+      responses:
+        "200":
+          description: List of positions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Position"
+    post:
+      operationId: createPosition
+      tags: [positions]
+      summary: Create a position
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePositionBody"
+      responses:
+        "201":
+          description: Created position
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Position"
+
+  /positions/{id}:
+    get:
+      operationId: getPosition
+      tags: [positions]
+      summary: Get a position by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Position
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Position"
+        "404":
+          description: Not found
+    patch:
+      operationId: updatePosition
+      tags: [positions]
+      summary: Update a position
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePositionBody"
+      responses:
+        "200":
+          description: Updated position
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Position"
+    delete:
+      operationId: deletePosition
+      tags: [positions]
+      summary: Delete a position
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /candidates:
+    get:
+      operationId: listCandidates
+      tags: [candidates]
+      summary: List all candidates
+      parameters:
+        - name: positionId
+          in: query
+          required: false
+          schema:
+            type: ["integer", "null"]
+        - name: stage
+          in: query
+          required: false
+          schema:
+            type: ["string", "null"]
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: ["string", "null"]
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of candidates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Candidate"
+    post:
+      operationId: createCandidate
+      tags: [candidates]
+      summary: Create a candidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCandidateBody"
+      responses:
+        "201":
+          description: Created candidate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Candidate"
+
+  /candidates/{id}:
+    get:
+      operationId: getCandidate
+      tags: [candidates]
+      summary: Get a candidate by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Candidate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Candidate"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateCandidate
+      tags: [candidates]
+      summary: Update a candidate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCandidateBody"
+      responses:
+        "200":
+          description: Updated candidate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Candidate"
+    delete:
+      operationId: deleteCandidate
+      tags: [candidates]
+      summary: Delete a candidate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /interviews:
+    get:
+      operationId: listInterviews
+      tags: [interviews]
+      summary: List all interviews
+      parameters:
+        - name: candidateId
+          in: query
+          required: false
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: List of interviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Interview"
+    post:
+      operationId: createInterview
+      tags: [interviews]
+      summary: Schedule an interview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInterviewBody"
+      responses:
+        "201":
+          description: Created interview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Interview"
+
+  /interviews/{id}:
+    get:
+      operationId: getInterview
+      tags: [interviews]
+      summary: Get an interview by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Interview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Interview"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateInterview
+      tags: [interviews]
+      summary: Update an interview
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateInterviewBody"
+      responses:
+        "200":
+          description: Updated interview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Interview"
+    delete:
+      operationId: deleteInterview
+      tags: [interviews]
+      summary: Delete an interview
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /feedback:
+    get:
+      operationId: listFeedback
+      tags: [feedback]
+      summary: List all feedback
+      parameters:
+        - name: interviewId
+          in: query
+          required: false
+          schema:
+            type: ["integer", "null"]
+        - name: candidateId
+          in: query
+          required: false
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: List of feedback
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Feedback"
+    post:
+      operationId: createFeedback
+      tags: [feedback]
+      summary: Submit feedback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFeedbackBody"
+      responses:
+        "201":
+          description: Created feedback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feedback"
+
+  /feedback/{id}:
+    patch:
+      operationId: updateFeedback
+      tags: [feedback]
+      summary: Update feedback
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateFeedbackBody"
+      responses:
+        "200":
+          description: Updated feedback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feedback"
+    delete:
+      operationId: deleteFeedback
+      tags: [feedback]
+      summary: Delete feedback
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary metrics
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/pipeline:
+    get:
+      operationId: getPipelineStats
+      tags: [dashboard]
+      summary: Get pipeline stage breakdown
+      responses:
+        "200":
+          description: Pipeline stats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PipelineStat"
+
+  /dashboard/recent-activity:
+    get:
+      operationId: getRecentActivity
+      tags: [dashboard]
+      summary: Get recent activity feed
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Position:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        department:
+          type: string
+        location:
+          type: string
+        type:
+          type: string
+          description: "full-time, part-time, contract, internship"
+        status:
+          type: string
+          description: "open, paused, closed"
+        description:
+          type: ["string", "null"]
+        headcount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - department
+        - location
+        - type
+        - status
+        - headcount
+        - createdAt
+        - updatedAt
+
+    CreatePositionBody:
+      type: object
+      properties:
+        title:
+          type: string
+        department:
+          type: string
+        location:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+        description:
+          type: ["string", "null"]
+        headcount:
+          type: integer
+      required:
+        - title
+        - department
+        - location
+        - type
+        - status
+        - headcount
+
+    UpdatePositionBody:
+      type: object
+      properties:
+        title:
+          type: ["string", "null"]
+        department:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        type:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        headcount:
+          type: ["integer", "null"]
+
+    Candidate:
+      type: object
+      properties:
+        id:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        positionId:
+          type: ["integer", "null"]
+        positionTitle:
+          type: ["string", "null"]
+        department:
+          type: ["string", "null"]
+        stage:
+          type: string
+          description: "applied, screening, technical, hr_interview, final_interview, offer, hired, rejected, withdrawn"
+        status:
+          type: string
+          description: "active, on_hold, archived"
+        source:
+          type: ["string", "null"]
+          description: "linkedin, referral, job_board, direct, agency"
+        resumeUrl:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        rating:
+          type: ["integer", "null"]
+          description: "1-5 overall rating"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+        - stage
+        - status
+        - createdAt
+        - updatedAt
+
+    CreateCandidateBody:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        positionId:
+          type: ["integer", "null"]
+        stage:
+          type: string
+        status:
+          type: string
+        source:
+          type: ["string", "null"]
+        resumeUrl:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        rating:
+          type: ["integer", "null"]
+      required:
+        - firstName
+        - lastName
+        - email
+        - stage
+        - status
+
+    UpdateCandidateBody:
+      type: object
+      properties:
+        firstName:
+          type: ["string", "null"]
+        lastName:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        positionId:
+          type: ["integer", "null"]
+        stage:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+        source:
+          type: ["string", "null"]
+        resumeUrl:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        rating:
+          type: ["integer", "null"]
+
+    Interview:
+      type: object
+      properties:
+        id:
+          type: integer
+        candidateId:
+          type: integer
+        candidateName:
+          type: ["string", "null"]
+        positionTitle:
+          type: ["string", "null"]
+        type:
+          type: string
+          description: "screening, technical, hr_interview, final_interview, case_study"
+        scheduledAt:
+          type: ["string", "null"]
+          format: date-time
+        durationMinutes:
+          type: ["integer", "null"]
+        interviewerName:
+          type: ["string", "null"]
+        interviewerEmail:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+          description: "video_call, phone, on_site"
+        meetingUrl:
+          type: ["string", "null"]
+        status:
+          type: string
+          description: "scheduled, completed, cancelled, no_show"
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - candidateId
+        - type
+        - status
+        - createdAt
+
+    CreateInterviewBody:
+      type: object
+      properties:
+        candidateId:
+          type: integer
+        type:
+          type: string
+        scheduledAt:
+          type: ["string", "null"]
+        durationMinutes:
+          type: ["integer", "null"]
+        interviewerName:
+          type: ["string", "null"]
+        interviewerEmail:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        meetingUrl:
+          type: ["string", "null"]
+        status:
+          type: string
+        notes:
+          type: ["string", "null"]
+      required:
+        - candidateId
+        - type
+        - status
+
+    UpdateInterviewBody:
+      type: object
+      properties:
+        type:
+          type: ["string", "null"]
+        scheduledAt:
+          type: ["string", "null"]
+        durationMinutes:
+          type: ["integer", "null"]
+        interviewerName:
+          type: ["string", "null"]
+        interviewerEmail:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        meetingUrl:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+
+    Feedback:
+      type: object
+      properties:
+        id:
+          type: integer
+        interviewId:
+          type: integer
+        candidateId:
+          type: integer
+        candidateName:
+          type: ["string", "null"]
+        interviewType:
+          type: ["string", "null"]
+        reviewerName:
+          type: string
+        reviewerEmail:
+          type: ["string", "null"]
+        rating:
+          type: integer
+          description: "1-5 overall rating"
+        technicalScore:
+          type: ["integer", "null"]
+        culturalScore:
+          type: ["integer", "null"]
+        communicationScore:
+          type: ["integer", "null"]
+        strengths:
+          type: ["string", "null"]
+        weaknesses:
+          type: ["string", "null"]
+        recommendation:
+          type: string
+          description: "strong_yes, yes, neutral, no, strong_no"
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - interviewId
+        - candidateId
+        - reviewerName
+        - rating
+        - recommendation
+        - createdAt
+
+    CreateFeedbackBody:
+      type: object
+      properties:
+        interviewId:
+          type: integer
+        candidateId:
+          type: integer
+        reviewerName:
+          type: string
+        reviewerEmail:
+          type: ["string", "null"]
+        rating:
+          type: integer
+        technicalScore:
+          type: ["integer", "null"]
+        culturalScore:
+          type: ["integer", "null"]
+        communicationScore:
+          type: ["integer", "null"]
+        strengths:
+          type: ["string", "null"]
+        weaknesses:
+          type: ["string", "null"]
+        recommendation:
+          type: string
+        notes:
+          type: ["string", "null"]
+      required:
+        - interviewId
+        - candidateId
+        - reviewerName
+        - rating
+        - recommendation
+
+    UpdateFeedbackBody:
+      type: object
+      properties:
+        rating:
+          type: ["integer", "null"]
+        technicalScore:
+          type: ["integer", "null"]
+        culturalScore:
+          type: ["integer", "null"]
+        communicationScore:
+          type: ["integer", "null"]
+        strengths:
+          type: ["string", "null"]
+        weaknesses:
+          type: ["string", "null"]
+        recommendation:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalCandidates:
+          type: integer
+        activeCandidates:
+          type: integer
+        hiredThisMonth:
+          type: integer
+        openPositions:
+          type: integer
+        interviewsScheduled:
+          type: integer
+        pendingFeedback:
+          type: integer
+        offersPending:
+          type: integer
+        avgTimeToHire:
+          type: ["number", "null"]
+          description: "Average days from application to hire"
+      required:
+        - totalCandidates
+        - activeCandidates
+        - hiredThisMonth
+        - openPositions
+        - interviewsScheduled
+        - pendingFeedback
+        - offersPending
+
+    PipelineStat:
+      type: object
+      properties:
+        stage:
+          type: string
+        count:
+          type: integer
+        label:
+          type: string
+      required:
+        - stage
+        - count
+        - label
+
+    ActivityItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          description: "candidate_added, stage_changed, interview_scheduled, feedback_submitted, offer_sent, hired, rejected"
+        description:
+          type: string
+        candidateName:
+          type: ["string", "null"]
+        positionTitle:
+          type: ["string", "null"]
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - id
+        - type
+        - description
+        - timestamp

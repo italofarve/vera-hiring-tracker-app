@@ -1,0 +1,58 @@
+[
+  {
+    "id": "slide-1-title",
+    "position": 1,
+    "title": "Vera Hiring Tracker",
+    "description": "La plataforma de talento diseñada para el sector financiero. Presentación para el equipo de dirección.",
+    "filepath": "src/pages/slides/Slide1Title.tsx",
+    "speakerNotes": "Abrir con la propuesta de valor principal: reducción del 70% en tiempo de criba y centralización del pipeline."
+  },
+  {
+    "id": "slide-2-problem",
+    "position": 2,
+    "title": "El problema que resolvemos",
+    "description": "Situación actual: hojas de cálculo, criba manual de 5-10 min por CV, comunicación inconsistente y evaluaciones subjetivas.",
+    "filepath": "src/pages/slides/Slide2Problem.tsx",
+    "speakerNotes": "Enfatizar el coste real: +40 horas al mes dedicadas a gestión manual del pipeline."
+  },
+  {
+    "id": "slide-3-solution",
+    "position": 3,
+    "title": "La solución: pipeline centralizado",
+    "description": "Sistema end-to-end con 7 etapas de selección, dashboard ejecutivo, portal de candidatos y feedback estructurado.",
+    "filepath": "src/pages/slides/Slide3Solution.tsx",
+    "speakerNotes": "Destacar que todo el equipo trabaja sobre el mismo estado en tiempo real."
+  },
+  {
+    "id": "slide-4-ai",
+    "position": 4,
+    "title": "IA que analiza CVs en segundos",
+    "description": "OpenAI GPT analiza el CV y devuelve 10 insights clave en menos de 30 segundos: experiencia, habilidades, adecuación al sector y valoración.",
+    "filepath": "src/pages/slides/Slide4AI.tsx",
+    "speakerNotes": "Mostrar el mockup del output de IA. Subrayar la reducción del 70% en tiempo de criba."
+  },
+  {
+    "id": "slide-5-impact",
+    "position": 5,
+    "title": "Impacto medible",
+    "description": "Comparativa antes/después: criba de 5-10 min a <30s, comunicación manual a automática, visibilidad cero a dashboard en tiempo real.",
+    "filepath": "src/pages/slides/Slide5Impact.tsx",
+    "speakerNotes": "La tabla de comparación es el argumento más sólido para la dirección. Leer fila por fila."
+  },
+  {
+    "id": "slide-6-tech",
+    "position": 6,
+    "title": "Arquitectura y seguridad",
+    "description": "Stack tecnológico empresarial: React, Node.js, PostgreSQL, Clerk Auth, OpenAI GPT, Resend y Object Storage cifrado.",
+    "filepath": "src/pages/slides/Slide6Tech.tsx",
+    "speakerNotes": "Resaltar que el sistema ya está en producción y disponible 24/7 con todas las medidas de seguridad activas."
+  },
+  {
+    "id": "slide-7-next",
+    "position": 7,
+    "title": "Próximos pasos y solicitud de recursos",
+    "description": "Roadmap en 3 fases. Fase 1 completada. Se solicita apoyo de IT, licencias de producción y equipo de desarrollo.",
+    "filepath": "src/pages/slides/Slide7Next.tsx",
+    "speakerNotes": "Cerrar ofreciendo una demo en vivo del sistema. La plataforma está operativa hoy mismo."
+  }
+]

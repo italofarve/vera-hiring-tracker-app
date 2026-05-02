@@ -1,0 +1,31 @@
+kind = "slides"
+previewPath = "/vera-pitch-deck/"
+title = "Vera Hiring Tracker — Pitch Deck"
+version = "1.0.0"
+id = "artifacts/vera-pitch-deck"
+router = "path"
+
+[[integratedSkills]]
+name = "slides"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/vera-pitch-deck/" ]
+localPort = 20710
+
+[services.development]
+run = "pnpm --filter @workspace/vera-pitch-deck run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/vera-pitch-deck", "run", "build" ]
+publicDir = "artifacts/vera-pitch-deck/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20710"
+BASE_PATH = "/vera-pitch-deck/"

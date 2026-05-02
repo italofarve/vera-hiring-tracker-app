@@ -1,0 +1,43 @@
+uploads = []
+
+[[generated]]
+id = "OJIx9ioyDDOm7Q-ZrvZPW"
+uri = "file://artifacts/vera-video-explainer/public/images/office-bg.png"
+type = "image"
+title = "Premium financial office"
+
+[[generated]]
+id = "orv7Y_eKOO17_Eb6Fg_40"
+uri = "file://artifacts/vera-video-explainer/public/images/ai-network.png"
+type = "image"
+title = "Abstract AI network"
+
+[[outputs]]
+id = "mHDt5ZU49D4cgSHKQaUVt"
+uri = "file://docs/vera-hiring-tracker-functional-guide.md"
+type = "text"
+title = "Vera Hiring Tracker — Guia Funcional"
+
+[[outputs]]
+id = "xnXknMvAZJSjYxCG0IX6n"
+uri = "file://docs/vera-prompts-resumen.md"
+type = "text"
+title = "Vera — Resumen de instrucciones"
+
+[[outputs]]
+id = "0bGCqaIjozLnYI-C7oKh8"
+uri = "file://docs/guia-iteracion-replit.md"
+type = "text"
+title = "Guía de iteración en Replit"
+
+[[outputs]]
+id = "dFJ9jO6ueic9Vb1N6trvA"
+uri = "file://SPEC.md"
+type = "text"
+title = "Especificación técnica (actualizada con sección 8.4)"
+
+[[outputs]]
+id = "O4ABa5oSI4vx6Mk6HSMuH"
+uri = "file://docker/README.md"
+type = "text"
+title = "Guía Docker — paso a paso"

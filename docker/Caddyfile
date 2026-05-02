@@ -1,0 +1,52 @@
+# =============================================================================
+# Caddyfile — reverse proxy con HTTPS automático
+#
+# Caddy obtiene certificados de Let's Encrypt automáticamente para el dominio
+# que pongas debajo. Sólo necesita que el dominio apunte por DNS al servidor
+# y que los puertos 80/443 estén abiertos.
+#
+# Para desarrollo local sin dominio, comenta el bloque {DOMAIN} y descomenta
+# el bloque ":80" más abajo.
+# =============================================================================
+
+# IMPORTANTE: sustituye {$DOMAIN} por tu dominio real (ej: vera.tudominio.com)
+# o define DOMAIN en el .env de docker-compose.
+{$DOMAIN} {
+    # /api/* va al backend Express
+    handle /api/* {
+        reverse_proxy api:8080
+    }
+
+    # Todo lo demás va al frontend estático (nginx)
+    handle {
+        reverse_proxy web:80
+    }
+
+    # Logs estructurados a stdout (los recoge Docker)
+    log {
+        output stdout
+        format console
+    }
+
+    # Headers de seguridad razonables
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        # Caddy añade el de servidor por defecto, ocultamos
+        -Server
+    }
+}
+
+# -----------------------------------------------------------------------------
+# DESARROLLO LOCAL SIN DOMINIO (descomenta para probar en localhost:80)
+# -----------------------------------------------------------------------------
+# :80 {
+#     handle /api/* {
+#         reverse_proxy api:8080
+#     }
+#     handle {
+#         reverse_proxy web:80
+#     }
+# }
