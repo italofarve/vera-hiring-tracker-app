@@ -25,6 +25,12 @@ Ultima actualizacion: 2026-05-02
 2. Ajuste de estrategia para CV en PDF image-based:
    - fallback OCR ya implementado por flag (`CV_OCR_FALLBACK_ENABLED`)
    - validar rendimiento/calidad en mas muestras reales.
+3. Preparacion de despliegue en DigitalOcean VM (rama `deploy/do-vm`):
+   - provisionar VM + DNS para `vera.italofarve.com`
+   - configurar Clerk Production con dominio verificado
+   - desplegar stack Docker en VM
+   - restaurar backup SQL para demo con datos visibles en panel:
+     - `backups/vera-db-20260501-161613.sql`
 
 ## Siguiente bloque (infra y producto)
 
