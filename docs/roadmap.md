@@ -1,6 +1,6 @@
 # Vera Hiring Tracker - Roadmap vivo
 
-Ultima actualizacion: 2026-05-02
+Ultima actualizacion: 2026-05-03
 
 ## Completado recientemente
 
@@ -31,6 +31,10 @@ Ultima actualizacion: 2026-05-02
    - desplegar stack Docker en VM
    - restaurar backup SQL para demo con datos visibles en panel:
      - `backups/vera-db-20260501-161613.sql`
+4. Estabilizacion post-despliegue en DO:
+   - corregir allowlist en DO (`docker/allowed-emails.csv` como archivo, no directorio)
+   - resolver lectura de PDF en entorno DO (`/api/candidates/:id/cv-text` devuelve 422)
+   - revisar flujo de sign-out en dominio productivo.
 
 ## Siguiente bloque (infra y producto)
 
@@ -63,5 +67,6 @@ Ultima actualizacion: 2026-05-02
 ## Referencias relacionadas
 
 - Estado de dockerizacion: `docs/dockerization-status-2026-05-01.md`
+- Diario de despliegue DO (2026-05-03): `docs/do-deployment-session-2026-05-03.md`
 - Especificacion tecnica ampliada: `SPEC.md`
 - Guia historica de migracion desde Replit: `replit.md`
