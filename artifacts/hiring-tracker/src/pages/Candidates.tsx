@@ -31,6 +31,7 @@ import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { StageBadge } from "@/components/StageBadge";
 import { StarRating } from "@/components/StarRating";
+import { QueryErrorBanner, formatQueryError } from "@/components/QueryErrorBanner";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 
@@ -63,8 +64,15 @@ export function Candidates() {
     ...(stageFilter !== "all" && { stage: stageFilter }),
     ...(statusFilter !== "all" && { status: statusFilter }),
   };
-  const { data: candidates, isLoading } = useListCandidates(params);
-  const { data: positions } = useListPositions();
+  const { data: candidates, isLoading, isError: candidatesError, error: candidatesQueryError } =
+    useListCandidates(params);
+  const {
+    data: positions,
+    isError: positionsError,
+    error: positionsQueryError,
+  } = useListPositions();
+  const listFailed = candidatesError || positionsError;
+  const listError = candidatesError ? candidatesQueryError : positionsQueryError;
   const createCandidate = useCreateCandidate();
   const deleteCandidate = useDeleteCandidate();
 
@@ -159,9 +167,11 @@ export function Candidates() {
         </Select>
       </div>
 
+      {listFailed ? <QueryErrorBanner message={formatQueryError(listError)} /> : null}
+
       {/* Table */}
       <div className="bg-card border border-border rounded-lg overflow-hidden">
-        {isLoading ? (
+        {listFailed ? null : isLoading ? (
           <div className="p-8 text-center text-muted-foreground">Loading candidates...</div>
         ) : filtered.length === 0 ? (
           <div className="p-12 text-center">

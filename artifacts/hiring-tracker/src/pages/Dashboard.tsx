@@ -1,5 +1,6 @@
 import { useGetDashboardSummary, useGetPipelineStats, useGetRecentActivity } from "@workspace/api-client-react";
 import { Users, Briefcase, Calendar, CheckCircle, Clock, AlertCircle, TrendingUp, Activity } from "lucide-react";
+import { QueryErrorBanner, formatQueryError } from "@/components/QueryErrorBanner";
 import { StageBadge } from "@/components/StageBadge";
 import { formatDistanceToNow } from "date-fns";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
@@ -17,9 +18,18 @@ const STAGE_COLORS: Record<string, string> = {
 };
 
 export function Dashboard() {
-  const { data: summary, isLoading: summaryLoading } = useGetDashboardSummary();
-  const { data: pipeline, isLoading: pipelineLoading } = useGetPipelineStats();
-  const { data: activity, isLoading: activityLoading } = useGetRecentActivity();
+  const summaryQ = useGetDashboardSummary();
+  const pipelineQ = useGetPipelineStats();
+  const activityQ = useGetRecentActivity();
+
+  const { data: summary, isLoading: summaryLoading, isError: summaryError, error: summaryErr } = summaryQ;
+  const { data: pipeline, isLoading: pipelineLoading, isError: pipelineError, error: pipelineErr } =
+    pipelineQ;
+  const { data: activity, isLoading: activityLoading, isError: activityError, error: activityErr } =
+    activityQ;
+
+  const dashboardFailed = summaryError || pipelineError || activityError;
+  const dashboardError = summaryErr ?? pipelineErr ?? activityErr;
 
   const metrics = [
     { label: "Total Candidates", value: summary?.totalCandidates ?? 0, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
@@ -40,6 +50,8 @@ export function Dashboard() {
         <p className="text-sm text-muted-foreground mt-1">Hiring pipeline overview</p>
       </div>
 
+      {dashboardFailed ? <QueryErrorBanner message={formatQueryError(dashboardError)} /> : null}
+
       {/* Metrics Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {metrics.map((metric) => {
@@ -56,8 +68,10 @@ export function Dashboard() {
                   <Icon className={`w-3.5 h-3.5 ${metric.color}`} />
                 </div>
               </div>
-              {summaryLoading ? (
+              {summaryLoading && !summaryError ? (
                 <div className="h-7 w-12 bg-muted animate-pulse rounded" />
+              ) : summaryError ? (
+                <p className="text-sm text-muted-foreground">—</p>
               ) : (
                 <p className="text-2xl font-bold text-foreground">{metric.value}</p>
               )}
@@ -71,8 +85,10 @@ export function Dashboard() {
         {/* Pipeline funnel */}
         <div className="bg-card border border-border rounded-lg p-5">
           <h2 className="text-sm font-semibold text-foreground mb-4">Candidate Pipeline</h2>
-          {pipelineLoading ? (
+          {pipelineLoading && !pipelineError ? (
             <div className="h-48 bg-muted animate-pulse rounded" />
+          ) : pipelineError ? (
+            <p className="text-sm text-muted-foreground py-12 text-center">Pipeline data unavailable</p>
           ) : (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={pipeline ?? []} layout="vertical" margin={{ left: 80, right: 20, top: 0, bottom: 0 }}>
@@ -95,12 +111,14 @@ export function Dashboard() {
         {/* Recent Activity */}
         <div className="bg-card border border-border rounded-lg p-5">
           <h2 className="text-sm font-semibold text-foreground mb-4">Recent Activity</h2>
-          {activityLoading ? (
+          {activityLoading && !activityError ? (
             <div className="space-y-3">
               {[1,2,3,4,5].map(i => (
                 <div key={i} className="h-12 bg-muted animate-pulse rounded" />
               ))}
             </div>
+          ) : activityError ? (
+            <p className="text-sm text-muted-foreground text-center py-8">Activity feed unavailable</p>
           ) : !activity || activity.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">No recent activity</p>
           ) : (
@@ -134,7 +152,7 @@ export function Dashboard() {
           <h2 className="text-sm font-semibold text-foreground">Stage Breakdown</h2>
         </div>
         <div className="divide-y divide-border">
-          {pipelineLoading ? (
+          {pipelineLoading && !pipelineError ? (
             <div className="p-5">
               <div className="space-y-2">
                 {[1,2,3,4,5].map(i => (
@@ -142,6 +160,8 @@ export function Dashboard() {
                 ))}
               </div>
             </div>
+          ) : pipelineError ? (
+            <div className="p-5 text-sm text-muted-foreground">Stage breakdown unavailable</div>
           ) : (
             (pipeline ?? []).filter(s => s.count > 0).map((stat) => (
               <div key={stat.stage} className="flex items-center justify-between px-5 py-3">

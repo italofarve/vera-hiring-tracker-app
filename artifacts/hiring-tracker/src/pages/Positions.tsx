@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { StageBadge } from "@/components/StageBadge";
+import { QueryErrorBanner, formatQueryError } from "@/components/QueryErrorBanner";
 import { useToast } from "@/hooks/use-toast";
 
 const positionSchema = z.object({
@@ -36,7 +37,7 @@ export function Positions() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: positions, isLoading } = useListPositions();
+  const { data: positions, isLoading, isError, error } = useListPositions();
   const createPosition = useCreatePosition();
   const deletePosition = useDeletePosition();
 
@@ -101,11 +102,15 @@ export function Positions() {
         />
       </div>
 
+      {isError ? (
+        <QueryErrorBanner message={formatQueryError(error)} />
+      ) : null}
+
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1,2,3].map(i => <div key={i} className="h-36 bg-muted animate-pulse rounded-lg" />)}
         </div>
-      ) : filtered.length === 0 ? (
+      ) : isError ? null : filtered.length === 0 ? (
         <div className="bg-card border border-border rounded-lg p-12 text-center">
           <Briefcase className="w-10 h-10 text-muted mx-auto mb-3" />
           <p className="text-sm font-medium text-foreground">No positions found</p>

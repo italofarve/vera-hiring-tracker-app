@@ -51,6 +51,7 @@ nano .env   # o el editor que prefieras
 
 Rellena al menos:
 
+- `COMPOSE_PROJECT_NAME` → nombre corto para prefijo de contenedores (ej: `vera-hiring-tracker-cursor`). Si lo omites, Compose usará el nombre de la carpeta (`docker`).
 - `DOMAIN` → tu dominio real (ej: `vera.tudominio.com`).
 - `POSTGRES_PASSWORD` → password fuerte para la base de datos.
 - `CLERK_SECRET_KEY` → del dashboard de Clerk.
