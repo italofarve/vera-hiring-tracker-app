@@ -13,6 +13,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { useState } from "react";
+import { useClerk } from "@clerk/react";
 import { cn } from "@/lib/utils";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -27,15 +28,13 @@ const navItems = [
 ];
 
 function SignOutButton() {
-  const handleSignOut = () => {
-    if (typeof window !== "undefined") {
-      window.location.href = `${basePath}/sign-in`;
-    }
-  };
+  const { signOut } = useClerk();
   if (!PUBLISHABLE_KEY) return null;
   return (
     <button
-      onClick={handleSignOut}
+      onClick={() => {
+        void signOut({ redirectUrl: `${basePath}/sign-in` });
+      }}
       data-testid="button-sign-out"
       className="flex items-center gap-2 text-xs text-sidebar-accent-foreground hover:text-sidebar-foreground transition-colors"
     >
