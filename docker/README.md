@@ -192,6 +192,16 @@ docker compose down -v   # -v borra los volúmenes (db + cv-uploads + caddy)
 - Verifica el formato del CSV: primera línea `email`, sin espacios extra.
 - Comprueba que el archivo está montado: `docker compose exec api cat /app/artifacts/api-server/data/allowed-emails.csv`.
 - Recarga: `curl -X POST https://vera.tudominio.com/api/access/reload -H "Authorization: Bearer ..."`.
+- Si actualizas `docker/.env` o el CSV y no ves cambios en runtime, fuerza recreación del API:
+  ```bash
+  docker compose up -d --force-recreate api
+  ```
+- Evita copiar archivos hacia `docker/allowed-emails.csv` si ese path se convirtió accidentalmente en directorio.
+  Comprueba siempre:
+  ```bash
+  ls -l docker/allowed-emails.csv
+  ```
+  Debe empezar por `-` (archivo regular), no `d` (directorio).
 
 ### "Cannot connect to database"
 
@@ -211,6 +221,10 @@ docker compose down -v   # -v borra los volúmenes (db + cv-uploads + caddy)
   ```bash
   sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile
   sudo mkswap /swapfile && sudo swapon /swapfile
+  ```
+- Para persistir swap tras reboot:
+  ```bash
+  echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
   ```
 
 ---

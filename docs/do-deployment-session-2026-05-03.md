@@ -23,6 +23,10 @@ Desplegar `vera-hiring-tracker-cursor` en un Droplet de DigitalOcean usando Dock
   - `interviews`: 5
   - `feedback`: 2
   - `activity`: 9
+- Estado actualizado 2026-05-04:
+  - fix de sign-out aplicado en frontend (`useClerk().signOut(...)`)
+  - extracción de texto CV en DO funcionando tras activar OCR fallback y recrear `api`
+  - allowlist CSV estable (archivo montado correctamente en contenedor).
 
 ## Incidencias encontradas y solucion
 
@@ -40,26 +44,12 @@ Desplegar `vera-hiring-tracker-cursor` en un Droplet de DigitalOcean usando Dock
 
 ## Pendiente para la proxima sesion
 
-1. **PDF / CV text extraction en DO**
-   - Error observado en frontend: `POST /api/candidates/:id/cv-text` -> `422`.
-   - Verificar variables OCR en `docker/.env` del Droplet:
-     - `CV_OCR_FALLBACK_ENABLED=true`
-     - `CV_OCR_LANG=eng`
-     - `CV_OCR_MIN_TEXT_LENGTH=40`
-     - `CV_OCR_TIMEOUT_MS=30000`
-     - `CV_OCR_MAX_PAGES=5`
-   - Revisar logs de `api` justo tras intentar extraer CV:
-     - `docker compose logs --tail 200 api`
-
-2. **Sign-out en produccion**
-   - Revisar comportamiento en ventana de incognito.
-   - Verificar en Clerk Production:
-     - dominio `vera.italofarve.com` validado
-     - `after sign-out URL` configurado a `https://vera.italofarve.com/`
-
-3. **Hardening operativo**
+1. **Hardening operativo**
    - Dejar script documentado para restore SQL.
    - Dejar procedimiento de backup periodico (`pg_dump`) en docs.
+2. **Conectividad SSH operativa**
+   - recordar que la regla `/32` del firewall DO depende de la IP pública actual del admin
+   - actualizar la source de la regla SSH cuando cambie IP.
 
 ## Comandos utiles (DO)
 
