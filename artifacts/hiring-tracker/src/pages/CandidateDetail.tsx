@@ -109,15 +109,15 @@ function CvSection({ candidateId }: { candidateId: number }) {
   };
 
   const handleAnalyze = async () => {
-    if (!cvText.trim()) {
-      toast({ title: "Primero extrae o pega el texto del CV", variant: "destructive" });
+    if (!cvText.trim() && !cvPath) {
+      toast({ title: "Primero sube un CV o pega el texto", variant: "destructive" });
       return;
     }
     setAnalyzing(true);
     const res = await fetch(`/api/candidates/${candidateId}/analyze-cv`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cvText }),
+      body: JSON.stringify({ cvText: cvText.trim() || undefined }),
     });
     if (res.ok) {
       const data = await res.json();
@@ -154,21 +154,9 @@ function CvSection({ candidateId }: { candidateId: number }) {
             {uploading ? "Subiendo..." : cvPath ? "Reemplazar CV" : "Subir CV"}
           </button>
           {cvPath && (
-            <>
-              <span className="flex items-center gap-1.5 text-xs text-emerald-600">
-                <CheckCircle className="w-3.5 h-3.5" /> CV adjunto
-              </span>
-              {!cvAnalysis && (
-                <button
-                  onClick={handleExtractText}
-                  disabled={extracting}
-                  className="flex items-center gap-2 px-3 py-1.5 border border-purple-300 text-purple-700 bg-purple-50 rounded-lg text-xs hover:bg-purple-100 transition-colors disabled:opacity-50"
-                >
-                  <FileText className="w-3.5 h-3.5" />
-                  {extracting ? "Extrayendo texto..." : "Extraer texto del fichero"}
-                </button>
-              )}
-            </>
+            <span className="flex items-center gap-1.5 text-xs text-emerald-600">
+              <CheckCircle className="w-3.5 h-3.5" /> CV adjunto y listo para analizar
+            </span>
           )}
           <input
             ref={fileRef}
@@ -180,32 +168,51 @@ function CvSection({ candidateId }: { candidateId: number }) {
         </div>
 
         {!cvAnalysis && (
-          <div className="border border-border rounded-lg p-3 space-y-2">
-            <p className="text-xs font-medium text-foreground flex items-center gap-1.5">
-              <Brain className="w-3.5 h-3.5 text-purple-500" /> Analizar CV con IA
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {cvPath
-                ? "Pulsa \"Extraer texto del fichero\" para leer el CV automaticamente, o pega el texto manualmente."
-                : "Sube el CV del candidato (PDF o Word) o pega el texto directamente para analizarlo con IA."}
-            </p>
-            <textarea
-              data-testid="input-cv-text"
-              value={cvText}
-              onChange={(e) => setCvText(e.target.value)}
-              rows={4}
-              placeholder="El texto del CV aparecera aqui tras extraerlo, o puedes pegarlo manualmente..."
-              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
-            />
+          <div className="border border-border rounded-lg p-3 space-y-4 bg-purple-50/30">
+            <div className="flex items-start gap-3">
+              <Brain className="w-5 h-5 text-purple-500 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-foreground">Análisis Inteligente con Gemini 2.5</p>
+                <p className="text-xs text-muted-foreground">
+                  {cvPath 
+                    ? "Vera analizará el documento original usando IA multimodal para obtener la mejor precisión."
+                    : "Sube un archivo PDF o Word para que la IA extraiga el perfil del candidato automáticamente."}
+                </p>
+              </div>
+            </div>
+            
             <button
               data-testid="button-analyze-cv"
               onClick={handleAnalyze}
-              disabled={analyzing || !cvText.trim()}
-              className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors"
+              disabled={analyzing || !cvPath}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:bg-slate-300 transition-all shadow-sm"
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              {analyzing ? "Analizando..." : "Analizar con IA"}
+              <Sparkles className="w-4 h-4" />
+              {analyzing ? "Vera está analizando el CV..." : "Analizar CV con IA"}
             </button>
+
+            {!cvPath && (
+              <div className="pt-2 border-t border-purple-100">
+                <p className="text-[10px] text-center text-muted-foreground uppercase tracking-wider font-bold">O pega el texto manualmente</p>
+                <textarea
+                  data-testid="input-cv-text"
+                  value={cvText}
+                  onChange={(e) => setCvText(e.target.value)}
+                  rows={3}
+                  placeholder="Si no tienes el archivo, pega aquí el texto..."
+                  className="mt-2 flex w-full rounded-md border border-input bg-background px-3 py-2 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
+                />
+                {cvText.trim() && (
+                  <button
+                    onClick={handleAnalyze}
+                    disabled={analyzing}
+                    className="mt-2 text-xs text-purple-600 font-semibold hover:underline"
+                  >
+                    Analizar texto pegado →
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
 

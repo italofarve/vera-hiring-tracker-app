@@ -36,6 +36,7 @@ COPY lib/db/package.json ./lib/db/
 COPY lib/object-storage-web/package.json ./lib/object-storage-web/
 COPY lib/integrations-openai-ai-server/package.json ./lib/integrations-openai-ai-server/
 COPY lib/integrations-openai-ai-react/package.json ./lib/integrations-openai-ai-react/
+COPY lib/integrations-gemini-ai-server/package.json ./lib/integrations-gemini-ai-server/
 
 # Sin lockfile estricto: Replit no commitea pnpm-lock.yaml
 RUN pnpm install --no-frozen-lockfile
@@ -61,8 +62,10 @@ RUN pnpm --filter @workspace/api-server run build
 # Build frontend → artifacts/hiring-tracker/dist/public/
 # Vite necesita VITE_CLERK_PUBLISHABLE_KEY en build time (se hornea en el bundle)
 ARG VITE_CLERK_PUBLISHABLE_KEY=""
+ARG VITE_API_BASE_URL="https://vera-serverless.italofarve.com"
 ENV NODE_ENV=production
 ENV VITE_CLERK_PUBLISHABLE_KEY=${VITE_CLERK_PUBLISHABLE_KEY}
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 RUN PORT=80 BASE_PATH=/ pnpm --filter @workspace/hiring-tracker run build
 RUN PORT=80 BASE_PATH=/vera-pitch-deck/ pnpm --filter @workspace/vera-pitch-deck run build
 RUN PORT=80 BASE_PATH=/vera-video-explainer/ pnpm --filter @workspace/vera-video-explainer run build
@@ -86,7 +89,7 @@ COPY --from=builder /app /app
 RUN mkdir -p /app/artifacts/api-server/data
 
 ENV NODE_ENV=production
-ENV PORT=8080
+# Cloud Run inyecta automáticamente la variable PORT. No la fijamos aquí para permitir flexibilidad.
 EXPOSE 8080
 
 # Migración de schema + arranque del server

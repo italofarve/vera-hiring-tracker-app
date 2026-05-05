@@ -9,25 +9,29 @@ import {
   setObjectAclPolicy,
 } from "./objectAcl";
 
+// Detect if we are in Replit or GCP
+const IS_REPLIT = !!process.env.REPLIT_ID;
 const REPLIT_SIDECAR_ENDPOINT = "http://127.0.0.1:1106";
 
-export const objectStorageClient = new Storage({
-  credentials: {
-    audience: "replit",
-    subject_token_type: "access_token",
-    token_url: `${REPLIT_SIDECAR_ENDPOINT}/token`,
-    type: "external_account",
-    credential_source: {
-      url: `${REPLIT_SIDECAR_ENDPOINT}/credential`,
-      format: {
-        type: "json",
-        subject_token_field_name: "access_token",
+export const objectStorageClient = IS_REPLIT 
+  ? new Storage({
+      credentials: {
+        audience: "replit",
+        subject_token_type: "access_token",
+        token_url: `${REPLIT_SIDECAR_ENDPOINT}/token`,
+        type: "external_account",
+        credential_source: {
+          url: `${REPLIT_SIDECAR_ENDPOINT}/credential`,
+          format: {
+            type: "json",
+            subject_token_field_name: "access_token",
+          },
+        },
+        universe_domain: "googleapis.com",
       },
-    },
-    universe_domain: "googleapis.com",
-  },
-  projectId: "",
-});
+      projectId: "",
+    })
+  : new Storage(); // In GCP, it uses Application Default Credentials automatically
 
 export class ObjectNotFoundError extends Error {
   constructor() {
@@ -128,13 +132,36 @@ export class ObjectStorageService {
     });
   }
 
+  async uploadObject(fileBuffer: Buffer, contentType: string): Promise<string> {
+    const privateObjectDir = this.getPrivateObjectDir();
+    const objectId = randomUUID();
+    const fullPath = `${privateObjectDir}/uploads/${objectId}`;
+    console.log(`[DEBUG] uploadObject starting for: ${fullPath}`);
+    const { bucketName, objectName } = parseObjectPath(fullPath);
+    console.log(`[DEBUG] Target Bucket: ${bucketName}, Target Object: ${objectName}`);
+
+    const bucket = objectStorageClient.bucket(bucketName);
+    const file = bucket.file(objectName);
+
+    await file.save(fileBuffer, {
+      metadata: { contentType },
+      resumable: false,
+    });
+    console.log(`[DEBUG] uploadObject SUCCESS: ${fullPath}`);
+
+    return fullPath;
+  }
+
   async getObjectEntityFile(objectPath: string): Promise<File> {
+    console.log(`[DEBUG] getObjectEntityFile called with: ${objectPath}`);
     if (!objectPath.startsWith("/objects/")) {
+      console.error(`[DEBUG] Path does not start with /objects/: ${objectPath}`);
       throw new ObjectNotFoundError();
     }
 
     const parts = objectPath.slice(1).split("/");
     if (parts.length < 2) {
+      console.error(`[DEBUG] Path parts too short: ${parts.length}`);
       throw new ObjectNotFoundError();
     }
 
@@ -144,35 +171,46 @@ export class ObjectStorageService {
       entityDir = `${entityDir}/`;
     }
     const objectEntityPath = `${entityDir}${entityId}`;
+    console.log(`[DEBUG] Final GCS Path: ${objectEntityPath}`);
+    
     const { bucketName, objectName } = parseObjectPath(objectEntityPath);
+    console.log(`[DEBUG] Bucket: ${bucketName}, Object: ${objectName}`);
+    
     const bucket = objectStorageClient.bucket(bucketName);
     const objectFile = bucket.file(objectName);
     const [exists] = await objectFile.exists();
     if (!exists) {
+      console.error(`[DEBUG] File DOES NOT EXIST in GCS: ${objectEntityPath}`);
       throw new ObjectNotFoundError();
     }
     return objectFile;
   }
 
   normalizeObjectEntityPath(rawPath: string): string {
-    if (!rawPath.startsWith("https://storage.googleapis.com/")) {
-      return rawPath;
+    let rawObjectPath = rawPath;
+
+    if (rawPath.startsWith("https://storage.googleapis.com/")) {
+      const url = new URL(rawPath);
+      rawObjectPath = url.pathname;
     }
 
-    const url = new URL(rawPath);
-    const rawObjectPath = url.pathname;
-
     let objectEntityDir = this.getPrivateObjectDir();
+    if (!objectEntityDir.startsWith("/")) {
+      objectEntityDir = `/${objectEntityDir}`;
+    }
     if (!objectEntityDir.endsWith("/")) {
       objectEntityDir = `${objectEntityDir}/`;
     }
 
-    if (!rawObjectPath.startsWith(objectEntityDir)) {
-      return rawObjectPath;
+    // Ensure rawObjectPath also starts with / for comparison
+    const normalizedRawPath = rawObjectPath.startsWith("/") ? rawObjectPath : `/${rawObjectPath}`;
+
+    if (normalizedRawPath.startsWith(objectEntityDir)) {
+      const entityId = normalizedRawPath.slice(objectEntityDir.length);
+      return `/objects/${entityId}`;
     }
 
-    const entityId = rawObjectPath.slice(objectEntityDir.length);
-    return `/objects/${entityId}`;
+    return normalizedRawPath;
   }
 
   async trySetObjectEntityAclPolicy(
@@ -238,30 +276,44 @@ async function signObjectURL({
   method: "GET" | "PUT" | "DELETE" | "HEAD";
   ttlSec: number;
 }): Promise<string> {
-  const request = {
-    bucket_name: bucketName,
-    object_name: objectName,
-    method,
-    expires_at: new Date(Date.now() + ttlSec * 1000).toISOString(),
-  };
-  const response = await fetch(
-    `${REPLIT_SIDECAR_ENDPOINT}/object-storage/signed-object-url`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(request),
-      signal: AbortSignal.timeout(30_000),
-    }
-  );
-  if (!response.ok) {
-    throw new Error(
-      `Failed to sign object URL, errorcode: ${response.status}, ` +
-        `make sure you're running on Replit`
+  if (IS_REPLIT) {
+    const request = {
+      bucket_name: bucketName,
+      object_name: objectName,
+      method,
+      expires_at: new Date(Date.now() + ttlSec * 1000).toISOString(),
+    };
+    const response = await fetch(
+      `${REPLIT_SIDECAR_ENDPOINT}/object-storage/signed-object-url`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(request),
+        signal: AbortSignal.timeout(30_000),
+      }
     );
-  }
+    if (!response.ok) {
+      throw new Error(
+        `Failed to sign object URL, errorcode: ${response.status}, ` +
+          `make sure you're running on Replit`
+      );
+    }
 
-  const { signed_url: signedURL } = await response.json();
-  return signedURL;
+    const { signed_url: signedURL } = await response.json();
+    return signedURL;
+  } else {
+    // Native GCP Signing
+    const bucket = objectStorageClient.bucket(bucketName);
+    const file = bucket.file(objectName);
+    
+    const [url] = await file.getSignedUrl({
+      version: 'v4',
+      action: method.toLowerCase() as 'get' | 'put' | 'delete' | 'head',
+      expires: Date.now() + ttlSec * 1000,
+    });
+    
+    return url;
+  }
 }

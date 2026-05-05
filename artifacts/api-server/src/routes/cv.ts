@@ -8,10 +8,12 @@ import { eq } from "drizzle-orm";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
 import { extractPdfTextWithOcr } from "../lib/pdfOcr";
 import { openai } from "@workspace/integrations-openai-ai-server";
+import { gemini } from "@workspace/integrations-gemini-ai-server";
 import mammoth from "mammoth";
 // pdf-parse is CJS-only; use require at runtime (globalThis.require is set by the build banner)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const pdfParse: (buf: Buffer) => Promise<{ text: string }> = (globalThis as any).require("pdf-parse");
+const pdfParseImport = (globalThis as any).require("pdf-parse");
+const pdfParse: (buf: Buffer) => Promise<{ text: string }> = pdfParseImport.default || pdfParseImport;
 
 const router = Router();
 const storage = multer.memoryStorage();
@@ -62,20 +64,8 @@ router.post("/candidates/:id/cv", upload.single("cv"), async (req: Request, res:
     await writeFile(localPath, req.file.buffer);
     cvPath = `local://${fileName}`;
   } else {
-    const uploadUrl = await objectStorage.getObjectEntityUploadURL();
-
-    const gcsResponse = await fetch(uploadUrl, {
-      method: "PUT",
-      headers: { "Content-Type": req.file.mimetype },
-      body: req.file.buffer,
-    });
-
-    if (!gcsResponse.ok) {
-      res.status(500).json({ error: "Failed to upload to storage" });
-      return;
-    }
-
-    cvPath = objectStorage.normalizeObjectEntityPath(uploadUrl.split("?")[0]);
+    const fullPath = await objectStorage.uploadObject(req.file.buffer, req.file.mimetype);
+    cvPath = objectStorage.normalizeObjectEntityPath(fullPath);
   }
 
   await db.update(candidatesTable).set({ cvPath, resumeUrl: cvPath }).where(eq(candidatesTable.id, id));
@@ -127,42 +117,53 @@ router.get("/candidates/:id/cv-text", async (req: Request, res: Response): Promi
   let ocrAttempted = false;
   let ocrFailureReason = "";
 
+  console.log(`[DEBUG] Extracting text. Content-Type: ${contentType}, Path: ${candidate.cvPath}`);
+
   if (contentType.includes("pdf") || candidate.cvPath.toLowerCase().endsWith(".pdf")) {
-    let pdfParseFailed = false;
-    try {
-      const parsed = await pdfParse(fileBuffer);
-      text = parsed.text;
-    } catch {
-      pdfParseFailed = true;
-    }
-
-    const normalizedPdfText = text.replace(/\s+/g, " ").trim();
-    const shouldRunOcrFallback =
-      cvOcrFallbackEnabled && (pdfParseFailed || normalizedPdfText.length < cvOcrMinTextLength);
-
-    if (shouldRunOcrFallback) {
-      ocrAttempted = true;
+    if (process.env.AI_PROVIDER === "gemini" && gemini) {
+      console.log("[DEBUG] Identified as PDF. Using Gemini for direct text extraction...");
       try {
-        const ocrResult = await extractPdfTextWithOcr(fileBuffer, {
-          lang: cvOcrLang,
-          maxPages: cvOcrMaxPages,
-          timeoutMs: cvOcrTimeoutMs,
-        });
-        if (ocrResult.text.length > normalizedPdfText.length) {
-          text = ocrResult.text;
-        }
+        const prompt = "Extract all text from this CV document. Return only the extracted text, no commentary.";
+        text = await gemini.analyzeCV(prompt, fileBuffer, contentType);
+        console.log(`[DEBUG] Gemini extraction success. Text length: ${text.length}`);
+        ocrAttempted = true;
+      } catch (geminiErr) {
+        console.error("[DEBUG] Gemini extraction FAILED:", geminiErr);
+        res.status(500).json({ error: "IA failed to extract text from PDF." });
+        return;
+      }
+    } else {
+      console.log("[DEBUG] Identified as PDF. Starting pdf-parse (legacy)...");
+      try {
+        const parsed = await pdfParse(fileBuffer);
+        text = parsed.text;
+        console.log(`[DEBUG] pdf-parse success. Text length: ${text.length}`);
       } catch (err) {
-        ocrFailureReason = err instanceof Error ? err.message : "unknown OCR error";
-        if (pdfParseFailed) {
-          res.status(422).json({
-            error:
-              `Could not extract text from PDF. The file may be image-based or corrupted. OCR fallback failed: ${ocrFailureReason}`,
+        console.error("[DEBUG] pdf-parse FAILED:", err);
+      }
+
+      const normalizedPdfText = text.replace(/\s+/g, " ").trim();
+      const shouldRunOcrFallback = cvOcrFallbackEnabled && (text.length < cvOcrMinTextLength);
+
+      if (shouldRunOcrFallback) {
+        ocrAttempted = true;
+        try {
+          const ocrResult = await extractPdfTextWithOcr(fileBuffer, {
+            lang: cvOcrLang,
+            maxPages: cvOcrMaxPages,
+            timeoutMs: cvOcrTimeoutMs,
           });
-          return;
+          if (ocrResult.text.length > normalizedPdfText.length) {
+            text = ocrResult.text;
+          }
+        } catch (err) {
+          console.error("[DEBUG] OCR FAILED:", err);
         }
       }
-    } else if (pdfParseFailed) {
-      res.status(422).json({ error: "Could not extract text from PDF. The file may be image-based or corrupted." });
+    }
+
+    if (!text && !ocrAttempted) {
+      res.status(422).json({ error: "Could not extract text from PDF." });
       return;
     }
   } else if (
@@ -260,13 +261,39 @@ ${fitFieldsBlock}
   "recommendedNextStep": "string"
 }`;
 
-  const completion = await openai.chat.completions.create({
-    model: "gpt-5.1",
-    messages: [{ role: "user", content: prompt }],
-    max_completion_tokens: 1500,
-  });
+  let analysisRaw = "";
 
-  const raw = completion.choices[0]?.message?.content ?? "{}";
+  if (gemini) {
+    // Si tenemos Gemini, intentamos análisis multimodal si hay un archivo
+    let fileBuffer: Buffer | undefined;
+    let mimeType: string | undefined;
+
+    if (candidate.cvPath) {
+      try {
+        if (isLocalCvPath(candidate.cvPath)) {
+          fileBuffer = await readFile(resolveLocalCvPath(candidate.cvPath));
+        } else {
+          const objectFile = await objectStorage.getObjectEntityFile(candidate.cvPath);
+          [fileBuffer] = await objectFile.download();
+        }
+        mimeType = candidate.cvPath.toLowerCase().endsWith(".pdf") ? "application/pdf" : undefined;
+      } catch (err) {
+        console.warn("Failed to load CV file for Gemini multimodal analysis, falling back to text", err);
+      }
+    }
+
+    analysisRaw = await gemini.analyzeCV(prompt, fileBuffer, mimeType);
+  } else {
+    // Fallback a OpenAI (solo texto)
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      max_completion_tokens: 1500,
+    });
+    analysisRaw = completion.choices[0]?.message?.content ?? "{}";
+  }
+
+  const raw = analysisRaw;
   let analysis: Record<string, unknown>;
   try {
     analysis = JSON.parse(raw);
