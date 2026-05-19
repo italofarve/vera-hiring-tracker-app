@@ -7,30 +7,42 @@
 ![Google Cloud](https://img.shields.io/badge/GoogleCloud-%234285F4.svg?style=for-the-badge&logo=google-cloud&logoColor=white)
 ![Gemini AI](https://img.shields.io/badge/Gemini%20AI-8E75B2?style=for-the-badge&logo=googlebard&logoColor=white)
 
-**Vera** es una plataforma *Full-Stack* diseñada para transformar y automatizar el proceso de selección y reclutamiento. Evolucionando desde un prototipo monolítico hasta una arquitectura **Serverless en la nube**, Vera utiliza la capacidad multimodal de **Gemini 2.5 Flash** para "leer" y estructurar currículums complejos de forma precisa y ultrarrápida.
+---
+
+## 💼 Resumen Ejecutivo y Valor de Negocio
+
+**Vera** es una plataforma *Full-Stack* de nivel empresarial, diseñada con un enfoque inicial hacia el **sector bancario y financiero**, que gestiona el **ciclo de vida completo** del seguimiento de candidatos: desde la recepción de la postulación hasta su incorporación final (*onboarding*).
+
+El enorme valor que Vera aporta a los departamentos de Recursos Humanos radica en su capacidad de ir más allá del simple almacenamiento de documentos. Utilizando Inteligencia Artificial Avanzada, el sistema:
+
+- **Se alinea con los Requerimientos:** Analiza el nivel de compatibilidad (*fit*) entre el candidato, la cultura de la empresa y las exigencias técnicas del puesto.
+- **Detecta Puntos Fuertes y Débiles:** Basándose estrictamente en las instrucciones y protocolos configurados por el departamento de RR.HH., la IA señala áreas de refuerzo y habilidades destacadas para preparar mejor las entrevistas.
+- **Gestión Integral:** Permite realizar un seguimiento centralizado de las fases del candidato, registro de entrevistas, calificaciones de los reclutadores y toma de decisiones.
+
+> 🎥 **Recursos Adicionales:** El proyecto cuenta con un [Vídeo Explicativo](./artifacts/vera-video-explainer) y un manual de ayuda operativo.
 
 ---
 
-## 🏗️ Arquitectura del Sistema
+## 🏗️ Arquitectura y Evolución (Monolito a Serverless)
 
 *Nota: Aquí puedes colocar el diagrama exportado de Lucid Chart.*
 ![Diagrama de Arquitectura de Vera](./docs/architecture-diagram.png)
 
-El sistema está diseñado pensando en escalabilidad y reducción de costos operativos (Serverless):
-- **Frontend (Web):** Single Page Application construida con React, Vite y TanStack Query.
-- **Backend (API):** Servidor Node.js (Express) robusto, conectado a una base de datos PostgreSQL mediante Drizzle ORM.
-- **Infraestructura Cloud:** Despliegue en **Google Cloud Run** (auto-escalado a cero) usando contenedores de Docker.
-- **AI Processing:** Integración directa entre Google Cloud Storage y Vertex AI (Gemini) para procesar documentos pesados sin colapsar la memoria del servidor.
-- **Autenticación & Comunicaciones:** Protegido con **Clerk** y envío de notificaciones mediante **Resend**.
+Vera ha superado una transformación técnica profunda, pasando de un prototipo monolítico construido en Replit a una **Arquitectura Serverless** de alto rendimiento en Google Cloud Platform. 
+
+Esta migración estratégica permitió implementar:
+- **Configuraciones de Privacidad y Red:** Aislamiento de servicios, gestión segura de secretos y despliegues controlados orientados a cumplir los altos estándares de seguridad y privacidad (PII) requeridos en la banca.
+- **Auto-escalado y Costos:** Despliegue en **Google Cloud Run** (auto-escalado a cero) usando contenedores de Docker.
+- **AI Processing (Gemini 2.5 Flash):** Integración directa y multimodal entre Google Cloud Storage y Vertex AI. A diferencia del OCR tradicional frágil, Vera envía los PDFs directamente a la IA de Google para "leer" visualmente la estructura y devolver un JSON estructurado con el perfil del candidato.
+- **Separación de Responsabilidades:** Frontend ágil en React/Vite, Backend robusto en Node.js (Express) con PostgreSQL, y autenticación externalizada y segura a través de **Clerk**.
 
 ---
 
-## 🌟 Características Principales
+## 🌟 Características Principales a Nivel Técnico
 
-1. **Extracción Multimodal con IA:** A diferencia del OCR tradicional frágil (`pdf-parse`), Vera envía los PDFs directamente a la IA multimodal de Google para "leer" visualmente la estructura y devolver un JSON estructurado con las habilidades y experiencia del candidato.
-2. **Evaluación de "Fit":** El sistema calcula automáticamente la idoneidad del candidato contra los requisitos específicos de la vacante utilizando Inteligencia Artificial.
-3. **Control de Acceso (Allowlist):** Restricciones de seguridad avanzadas para permitir que solo usuarios pre-aprobados accedan a posiciones específicas.
-4. **Infraestructura Inmutable (Docker):** Todo el entorno de desarrollo y producción está contenido en `docker-compose`, garantizando paridad entre lo que se programa y lo que se despliega.
+1. **Extracción Multimodal con IA:** Cero dependencias de librerías frágiles de análisis de texto. Lectura visual directa del documento.
+2. **Control de Acceso (Allowlist):** Restricciones de seguridad avanzadas para permitir que solo usuarios pre-aprobados accedan a posiciones específicas o paneles de administración.
+3. **Infraestructura Inmutable (Docker):** Todo el entorno de desarrollo y producción está contenido en `docker-compose`, garantizando paridad entre lo que se programa y lo que se despliega.
 
 ---
 
@@ -57,7 +69,7 @@ La forma más sencilla de probar Vera en tu máquina local es utilizando Docker.
 
 ## 📚 Documentación Técnica
 
-Para los desarrolladores o ingenieros de DevOps que quieran profundizar en las decisiones técnicas del proyecto:
+Para los desarrolladores, arquitectos o ingenieros de DevOps que quieran profundizar en las decisiones técnicas del proyecto:
 
 - [Caso de Estudio Ejecutivo / Visión Empresarial](docs/EXECUTIVE_VISION.md)
 - [Guía de Despliegue en Google Cloud Run](docs/gcp-deployment.md)
