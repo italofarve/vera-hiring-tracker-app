@@ -21,6 +21,9 @@ El enorme valor que Vera aporta a los departamentos de Recursos Humanos radica e
 
 > 🎥 **Recursos Adicionales:** El proyecto cuenta con un [Vídeo Explicativo](./artifacts/vera-video-explainer) y un manual de ayuda operativo.
 
+> [!WARNING]
+> **Aviso sobre IA Responsable y Datos de Prueba:** Los datos, currículums e información de candidatos utilizados en esta demostración son **estrictamente sintéticos** y generados con fines de prueba. Al tratarse de un prototipo, cualquier organización que desee llevar un sistema de este tipo a producción debe someterlo a rigurosas auditorías éticas, sesgo algorítmico y aplicar las buenas prácticas internacionales de **IA Responsable** antes de operar con datos reales.
+
 ---
 
 ## 🏗️ Arquitectura y Evolución (Monolito a Serverless)

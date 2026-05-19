@@ -62,5 +62,3 @@ docker/allowed-emails.csv
 # Dumps/archives locales (credenciales, PII en SQL o tarballs)
 /backups/
 
-# Documentos Privados del Profesor
-docs/EXECUTIVE_VISION.md
