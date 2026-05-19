@@ -16,7 +16,7 @@
 El enorme valor que Vera aporta a los departamentos de Recursos Humanos radica en su capacidad de ir más allá del simple almacenamiento de documentos. Utilizando Inteligencia Artificial Avanzada, el sistema:
 
 - **Se alinea con los Requerimientos:** Analiza el nivel de compatibilidad (*fit*) entre el candidato, la cultura de la empresa y las exigencias técnicas del puesto.
-- **Detecta Puntos Fuertes y Débiles:** Basándose estrictamente en las instrucciones y protocolos configurados por el departamento de RR.HH., la IA señala áreas de refuerzo y habilidades destacadas para preparar mejor las entrevistas.
+- **Detecta Puntos Fuertes y Débiles:** Basándose estrictamente en las instrucciones y protocolos configurados por el departamento de RR.HH., la IA señala áreas de refuerzo y habilidades destacadas para preparar mejor las entrevistas. El hecho de seguir al pie de la letra este protocolo corporativo dota al sistema de **fiabilidad, transparencia y trazabilidad** en cada decisión.
 - **Gestión Integral:** Permite realizar un seguimiento centralizado de las fases del candidato, registro de entrevistas, calificaciones de los reclutadores y toma de decisiones.
 
 > 🎥 **Recursos Adicionales:** El proyecto cuenta con un [Vídeo Explicativo](./artifacts/vera-video-explainer) y un manual de ayuda operativo.
@@ -33,7 +33,7 @@ Vera ha superado una transformación técnica profunda, pasando de un prototipo 
 Esta migración estratégica permitió implementar:
 - **Configuraciones de Privacidad y Red:** Aislamiento de servicios, gestión segura de secretos y despliegues controlados orientados a cumplir los altos estándares de seguridad y privacidad (PII) requeridos en la banca.
 - **Auto-escalado y Costos:** Despliegue en **Google Cloud Run** (auto-escalado a cero) usando contenedores de Docker.
-- **AI Processing (Gemini 2.5 Flash):** Integración directa y multimodal entre Google Cloud Storage y Vertex AI. A diferencia del OCR tradicional frágil, Vera envía los PDFs directamente a la IA de Google para "leer" visualmente la estructura y devolver un JSON estructurado con el perfil del candidato.
+- **Procesamiento de IA Agnóstico (Gemini / OpenAI):** Integración directa y multimodal entre Google Cloud Storage y Vertex AI usando **Gemini 2.5 Flash** por defecto para despliegues nativos en GCP. Sin embargo, el sistema está diseñado para ser flexible y soporta la configuración nativa con modelos de **OpenAI** si así se requiere, adaptándose a cualquier ecosistema. A diferencia del OCR tradicional frágil, Vera envía los PDFs directamente a la IA para "leer" visualmente la estructura y devolver un JSON estructurado con el perfil del candidato.
 - **Separación de Responsabilidades:** Frontend ágil en React/Vite, Backend robusto en Node.js (Express) con PostgreSQL, y autenticación externalizada y segura a través de **Clerk**.
 
 ---
