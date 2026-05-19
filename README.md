@@ -25,8 +25,50 @@ El enorme valor que Vera aporta a los departamentos de Recursos Humanos radica e
 
 ## 🏗️ Arquitectura y Evolución (Monolito a Serverless)
 
-*Nota: Aquí puedes colocar el diagrama exportado de Lucid Chart.*
-![Diagrama de Arquitectura de Vera](./docs/architecture-diagram.png)
+*El siguiente diagrama interactivo se ha generado automáticamente:*
+
+```mermaid
+graph TD
+    %% Definición de Estilos
+    classDef gcp fill:#4285F4,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef saas fill:#34A853,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef db fill:#FBBC05,stroke:#fff,stroke-width:2px,color:#000;
+    classDef app fill:#EA4335,stroke:#fff,stroke-width:2px,color:#fff;
+
+    User((👤 Usuario / RRHH))
+
+    subgraph SaaS [Servicios Externos]
+        Clerk[Clerk Auth]:::saas
+        Resend[Resend Emails]:::saas
+    end
+
+    subgraph GCP [Google Cloud Platform]
+        subgraph CloudRun [Cloud Run - Serverless]
+            Caddy[Caddy Reverse Proxy]:::app
+            React[Frontend: React + Vite]:::app
+            Express[Backend: Node API]:::app
+        end
+        GCS[(Cloud Storage - CVs)]:::gcp
+        Vertex[Vertex AI / Gemini 2.5]:::gcp
+    end
+    
+    DB[(PostgreSQL 16)]:::db
+
+    %% Flujos
+    User -- HTTPS --> Caddy
+    User -- Login --> Clerk
+    
+    Caddy -- UI estática --> React
+    Caddy -- Peticiones API --> Express
+    
+    Express -- Valida Token --> Clerk
+    Express -- Almacena/Lee Datos --> DB
+    Express -- Sube Documentos --> GCS
+    Express -- Notificaciones --> Resend
+    
+    GCS -. Lee PDF .-> Vertex
+    Vertex -. Retorna JSON estructurado .-> Express
+```
 
 Vera ha superado una transformación técnica profunda, pasando de un prototipo monolítico construido en Replit a una **Arquitectura Serverless** de alto rendimiento en Google Cloud Platform. 
 
