@@ -32,21 +32,33 @@ Este plan describe la transición desde una arquitectura basada en VM (Monolito)
 
 ---
 
-## Próximos Pasos
+## Estado del Proyecto
 
 ### Fase 1: Preparación de Imágenes
-- [ ] Configurar **Artifact Registry** para guardar las imágenes de Docker.
-- [ ] Crear scripts para hacer `docker push` de la API y la Web.
+- [x] Configurar **Artifact Registry** para guardar las imágenes de Docker.
+- [x] Crear scripts para hacer `docker push` de la API y la Web (`scripts/gcp-build-push.sh`).
 
 ### Fase 2: Infraestructura de Datos
-- [ ] Crear instancia de **Cloud SQL**.
-- [ ] Crear Bucket en **Cloud Storage**.
+- [x] Crear instancia de **Cloud SQL**.
+- [x] Crear Bucket en **Cloud Storage** (`vera-hiring-tracker-cvs`).
 
 ### Fase 3: Despliegue de Servicios e IA
-- [ ] Crear la librería `lib/integrations-gemini-ai-server`.
-- [ ] Actualizar la ruta `/analyze-cv` para soportar envío directo de archivos a Gemini.
-- [ ] Desplegar `vera-api` en Cloud Run vinculando los secretos e IAM roles para Gemini.
-- [ ] Desplegar `vera-web` en Cloud Run.
+- [x] Crear la librería `lib/integrations-gemini-ai-server`.
+- [x] Actualizar la ruta `/analyze-cv` para soportar envío directo de archivos a Gemini (vision multimodal).
+- [x] Desplegar `vera-api` en Cloud Run vinculando los secretos e IAM roles para Gemini (Vertex AI).
+- [x] Desplegar `vera-web` en Cloud Run.
+
+---
+
+## Configuración de Dominios Personalizados (Cloud Run)
+
+Para mejorar la experiencia de usuario y accesibilidad, se han configurado los siguientes dominios mapeados al servicio frontend (`vera-web`) en la región `europe-west1`:
+
+1. **Dominio Principal:** `https://vera-serverless.italofarve.com`
+2. **Dominio Alternativo (subdominio):** `https://www.vera-serverless.italofarve.com`
+
+Ambos dominios cuentan con certificados SSL gestionados automáticamente por Google Cloud.
 
 ---
 *Rama de trabajo: deploy/gcp-cloud-run*
+*Última actualización: 2026-05-27 por Antigravity*
