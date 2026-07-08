@@ -15,6 +15,7 @@ import {
   Play,
   PresentationIcon,
   ExternalLink,
+  Download,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -48,10 +49,15 @@ const modules = [
     title: "Analisis de CV con IA",
     subtitle: "Criba curricular inteligente",
     description:
-      "Desde el perfil de cada candidato, sube su CV o pega el texto y obtengon en segundos: resumen ejecutivo, anos de experiencia, habilidades detectadas, adecuacion al sector financiero (Alta/Media/Baja), puntos fuertes, areas a explorar y siguiente paso recomendado.",
+      "Desde el perfil de cada candidato, sube su CV o pega el texto y obtén en segundos: resumen ejecutivo, años de experiencia, habilidades detectadas, adecuación al sector financiero (Alta/Media/Baja), puntos fuertes, áreas a explorar y siguiente paso recomendado. A continuación puedes descargar algunos CVs de ejemplo que hemos preparado para que puedas probar esta funcionalidad:",
     path: "/candidates",
     stages: undefined as string[] | undefined,
     external: undefined as boolean | undefined,
+    downloads: [
+      { label: "CV Senior Software Engineer", href: "/examples-cv/cv-senior-swe.pdf" },
+      { label: "CV Senior Software Engineer (Perfil Femenino)", href: "/examples-cv/cv-senior-swe-femenino.pdf" },
+      { label: "CV Software Engineer Junior", href: "/examples-cv/cv-junior-swe.pdf" }
+    ],
   },
   {
     icon: Briefcase,
@@ -190,6 +196,21 @@ function AccordionModule({ mod }: { mod: typeof modules[0] }) {
       {open && (
         <div className="px-5 pb-5 pt-1 border-t border-border bg-muted/10">
           <p className="text-sm text-foreground leading-relaxed mb-3">{mod.description}</p>
+          {mod.downloads && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {mod.downloads.map((d, i) => (
+                <a
+                  key={i}
+                  href={d.href}
+                  download
+                  className="inline-flex items-center gap-1.5 text-xs font-medium bg-[#00205b]/5 text-[#00205b] hover:bg-[#00205b]/10 px-3 py-1.5 rounded-md transition-colors"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  {d.label}
+                </a>
+              ))}
+            </div>
+          )}
           {mod.stages && (
             <div className="flex flex-wrap gap-1.5">
               {mod.stages.map((s, i) => (
