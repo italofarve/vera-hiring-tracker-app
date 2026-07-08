@@ -61,7 +61,8 @@ export function requireAllowedEmail(): RequestHandler {
       });
       return;
     }
-    const allowed = await isEmailAllowed(email);
+    const isAllowlistDisabled = process.env.DISABLE_ALLOWLIST === "true";
+    const allowed = isAllowlistDisabled ? true : await isEmailAllowed(email);
     if (!allowed) {
       res.status(403).json({
         error: "not_allowlisted",

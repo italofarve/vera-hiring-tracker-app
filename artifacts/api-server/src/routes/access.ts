@@ -39,7 +39,8 @@ router.get("/access/check", async (req, res) => {
     res.status(502).json({ allowed: false, error: "user_lookup_failed" });
     return;
   }
-  const allowed = await isEmailAllowed(email);
+  const isAllowlistDisabled = process.env.DISABLE_ALLOWLIST === "true";
+  const allowed = isAllowlistDisabled ? true : await isEmailAllowed(email);
   res.json({ allowed, email });
 });
 
@@ -73,7 +74,8 @@ router.post("/access/reload", async (req, res) => {
     res.status(502).json({ error: "user_lookup_failed" });
     return;
   }
-  if (!(await isEmailAllowed(email))) {
+  const isAllowlistDisabled = process.env.DISABLE_ALLOWLIST === "true";
+  if (!isAllowlistDisabled && !(await isEmailAllowed(email))) {
     res.status(403).json({ error: "not_allowlisted" });
     return;
   }
