@@ -26,8 +26,9 @@ echo "Construyendo imagen de la API (AMD64)..."
 docker build --platform linux/amd64 -t vera-api:latest -f docker/Dockerfile --target api .
 
 echo "Construyendo imagen de la WEB (AMD64)..."
-# Inyectamos la URL de la API para que el frontend sepa a dónde llamar
-docker build --platform linux/amd64 -t vera-web:latest -f docker/Dockerfile --target web .
+# Inyectamos la variable VITE_CLERK_PUBLISHABLE_KEY para que Clerk funcione en el frontend
+CLERK_PUB_KEY=$(grep VITE_CLERK_PUBLISHABLE_KEY docker/.env | cut -d '=' -f2)
+docker build --platform linux/amd64 -t vera-web:latest --build-arg VITE_CLERK_PUBLISHABLE_KEY="${CLERK_PUB_KEY}" -f docker/Dockerfile --target web .
 
 # 4. Etiquetar y Subir
 API_PATH="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/vera-api:latest"
