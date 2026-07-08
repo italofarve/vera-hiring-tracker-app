@@ -114,15 +114,31 @@ function CvSection({ candidateId }: { candidateId: number }) {
       return;
     }
     setAnalyzing(true);
+
+    let textToAnalyze = cvText.trim();
+    if (!textToAnalyze && cvPath) {
+      const extractRes = await fetch(`/api/candidates/${candidateId}/cv-text`);
+      if (extractRes.ok) {
+        const data = await extractRes.json();
+        textToAnalyze = data.text;
+        setCvText(data.text);
+      } else {
+        const data = await extractRes.json().catch(() => ({}));
+        toast({ title: data.error || "Error al extraer el texto del archivo CV", variant: "destructive" });
+        setAnalyzing(false);
+        return;
+      }
+    }
+
     const res = await fetch(`/api/candidates/${candidateId}/analyze-cv`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cvText: cvText.trim() || undefined }),
+      body: JSON.stringify({ cvText: textToAnalyze }),
     });
     if (res.ok) {
       const data = await res.json();
       setCvAnalysis(data.analysis);
-      toast({ title: "Analisis completado" });
+      toast({ title: "Análisis completado" });
     } else {
       toast({ title: "Error al analizar el CV", variant: "destructive" });
     }
