@@ -27,7 +27,7 @@ docker build --platform linux/amd64 -t vera-api:latest -f docker/Dockerfile --ta
 
 echo "Construyendo imagen de la WEB (AMD64)..."
 # Inyectamos la variable VITE_CLERK_PUBLISHABLE_KEY para que Clerk funcione en el frontend
-CLERK_PUB_KEY=$(grep VITE_CLERK_PUBLISHABLE_KEY docker/.env | cut -d '=' -f2)
+CLERK_PUB_KEY=$(gcloud secrets versions access latest --secret="VITE_CLERK_PUBLISHABLE_KEY" --project=${PROJECT_ID})
 docker build --platform linux/amd64 -t vera-web:latest --build-arg VITE_CLERK_PUBLISHABLE_KEY="${CLERK_PUB_KEY}" -f docker/Dockerfile --target web .
 
 # 4. Etiquetar y Subir
