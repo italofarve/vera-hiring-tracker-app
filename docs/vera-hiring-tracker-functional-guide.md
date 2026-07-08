@@ -36,19 +36,16 @@ Gestión completa de todos los candidatos en proceso:
 ---
 
 ### 3. Análisis de CV con Inteligencia Artificial
-Dentro de cada perfil de candidato, el equipo de RR.HH. puede:
-- Subir el CV del candidato (PDF o Word) para guardarlo en la plataforma
-- Pegar el texto del CV y lanzar un análisis automático con IA que devuelve:
+Dentro de cada perfil de candidato, el equipo de RR.HH. puede aprovechar la inteligencia artificial para contrastar automáticamente el CV con los requisitos del puesto:
+- **Flujo simplificado**: Subir el CV del candidato (PDF o Word) y hacer clic directamente en "Analizar CV con IA". La plataforma se encarga de extraer el texto en segundo plano y enviarlo a la IA en un solo paso.
+- **Vista de resultados ("Show analysis")**: Una vez analizado, se despliega un reporte estructurado y detallado que devuelve:
+  - **Grado de adecuación** del perfil con la lógica de negocio del departamento (Alta / Media / Baja)
   - **Resumen ejecutivo** del perfil
-  - **Años de experiencia** estimados
-  - **Habilidades principales** detectadas
-  - **Nivel educativo** y especialidad
-  - **Idiomas** identificados
-  - **Puntos fuertes** del candidato
-  - **Áreas a explorar** en la entrevista
-  - **Valoración sugerida** (1–5 estrellas)
-  - **Adecuación al sector financiero** (Alta / Media / Baja)
-  - **Siguiente paso recomendado** en el proceso
+  - **Años de experiencia** estimados y **Nivel educativo**
+  - **Habilidades principales** e **Idiomas** detectados
+  - **Puntos fuertes** del candidato y **Áreas a explorar** en la entrevista
+  - **Valoración sugerida** (1–5 estrellas) y **Siguiente paso recomendado**
+- **Actualizaciones ágiles**: Si el CV cambia o se necesita actualizar la evaluación, el usuario puede desplegar los resultados y pulsar el botón **"Re-analizar"** ubicado al final del reporte.
 
 **Impacto:** Reduce el tiempo de criba curricular hasta un 70%. Un recruiter puede evaluar un perfil en segundos en lugar de minutos, con criterios objetivos y consistentes.
 
