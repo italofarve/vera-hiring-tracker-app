@@ -18,6 +18,7 @@ import {
   Download,
 } from "lucide-react";
 import { useState } from "react";
+import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 
 const modules = [
@@ -213,6 +214,21 @@ function AccordionModule({ mod }: { mod: typeof modules[0] }) {
                   {d.label}
                 </a>
               ))}
+            </div>
+          )}
+          {mod.path && (
+            <div className="mb-4">
+              {mod.external ? (
+                <a href={mod.path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-medium text-[#00205b] hover:underline">
+                  Acceder a la sección
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              ) : (
+                <Link href={mod.path} className="inline-flex items-center gap-1.5 text-xs font-medium text-[#00205b] hover:underline">
+                  Acceder a la sección
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              )}
             </div>
           )}
           {mod.stages && (
