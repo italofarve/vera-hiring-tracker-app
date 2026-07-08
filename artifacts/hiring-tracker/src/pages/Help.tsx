@@ -49,7 +49,11 @@ const modules = [
     title: "Analisis de CV con IA",
     subtitle: "Criba curricular inteligente",
     description:
-      "Desde el perfil de cada candidato, sube su CV o pega el texto y obtén en segundos: resumen ejecutivo, años de experiencia, habilidades detectadas, adecuación al sector financiero (Alta/Media/Baja), puntos fuertes, áreas a explorar y siguiente paso recomendado. A continuación puedes descargar algunos CVs de ejemplo que hemos preparado para que puedas probar esta funcionalidad:",
+      "La inteligencia artificial de Vera evalúa el currículum de cada candidato contrastándolo directamente con los requisitos del puesto al que aplica.\n\n" +
+      "• Para realizar el análisis inicial: Entra al perfil del candidato, haz clic en \"Subir CV\" para cargar el documento y pulsa \"Analizar CV con IA\".\n" +
+      "• Revisar resultados: Haz clic en \"Show analysis\" para desplegar el reporte completo, donde verás el grado de adecuación, puntos fuertes y carencias basados en la lógica de negocio del departamento.\n" +
+      "• Actualizaciones: Si necesitas cargar un CV más reciente o volver a procesar la información, abre la sección \"Show analysis\" y haz clic en \"Re-analizar\" al final del reporte.\n\n" +
+      "A continuación puedes descargar algunos CVs de ejemplo que hemos preparado para que puedas probar esta funcionalidad:",
     path: "/candidates",
     stages: undefined as string[] | undefined,
     external: undefined as boolean | undefined,
@@ -195,7 +199,7 @@ function AccordionModule({ mod }: { mod: typeof modules[0] }) {
       </button>
       {open && (
         <div className="px-5 pb-5 pt-1 border-t border-border bg-muted/10">
-          <p className="text-sm text-foreground leading-relaxed mb-3">{mod.description}</p>
+          <p className="text-sm text-foreground leading-relaxed mb-3 whitespace-pre-wrap">{mod.description}</p>
           {mod.downloads && (
             <div className="flex flex-wrap gap-2 mb-4">
               {mod.downloads.map((d, i) => (
