@@ -17,7 +17,7 @@ export class GeminiAIClient {
       project: options.project || process.env.GOOGLE_CLOUD_PROJECT || "",
       location: options.location || process.env.GOOGLE_CLOUD_LOCATION || "us-central1",
     });
-    this.model = options.model || "gemini-2.5-flash";
+    this.model = options.model || process.env.GEMINI_MODEL || "gemini-2.5-flash";
   }
 
   /**

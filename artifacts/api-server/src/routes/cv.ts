@@ -264,11 +264,14 @@ ${fitFieldsBlock}
   let analysisRaw = "";
 
   if (gemini) {
-    // Si tenemos Gemini, intentamos análisis multimodal si hay un archivo
+    // Si tenemos texto suficiente, usamos el análisis de texto directo (mucho más rápido).
+    // Solo si el texto es escaso o nulo, recurrimos a cargar el binario para análisis multimodal (PDF visual).
     let fileBuffer: Buffer | undefined;
     let mimeType: string | undefined;
 
-    if (candidate.cvPath) {
+    const hasSufficientText = cvText && cvText.trim().length >= 40;
+
+    if (!hasSufficientText && candidate.cvPath) {
       try {
         if (isLocalCvPath(candidate.cvPath)) {
           fileBuffer = await readFile(resolveLocalCvPath(candidate.cvPath));
@@ -278,7 +281,7 @@ ${fitFieldsBlock}
         }
         mimeType = candidate.cvPath.toLowerCase().endsWith(".pdf") ? "application/pdf" : undefined;
       } catch (err) {
-        console.warn("Failed to load CV file for Gemini multimodal analysis, falling back to text", err);
+        console.warn("Failed to load CV file for Gemini multimodal analysis fallback", err);
       }
     }
 
@@ -296,7 +299,11 @@ ${fitFieldsBlock}
   const raw = analysisRaw;
   let analysis: Record<string, unknown>;
   try {
-    analysis = JSON.parse(raw);
+    const cleanedRaw = raw
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```$/i, "")
+      .trim();
+    analysis = JSON.parse(cleanedRaw);
   } catch {
     analysis = { summary: raw };
   }

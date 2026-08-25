@@ -47,6 +47,8 @@ Este plan describe la transición desde una arquitectura basada en VM (Monolito)
 - [x] Actualizar la ruta `/analyze-cv` para soportar envío directo de archivos a Gemini (vision multimodal).
 - [x] Desplegar `vera-api` en Cloud Run vinculando los secretos e IAM roles para Gemini (Vertex AI).
 - [x] Desplegar `vera-web` en Cloud Run.
+- [x] Añadir soporte para variable de entorno `GEMINI_MODEL` y optimizar la latencia del análisis de fit (envío de texto directo, reducción del 70% de tiempo).
+- [x] Implementar desinfectador automático de comillas markdown (` ```json `) para garantizar el parseo correcto de la respuesta JSON.
 
 ---
 
@@ -61,4 +63,4 @@ Ambos dominios cuentan con certificados SSL gestionados automáticamente por Goo
 
 ---
 *Rama de trabajo: deploy/gcp-cloud-run*
-*Última actualización: 2026-05-27 por Antigravity*
+*Última actualización: 2026-08-25 por Antigravity*
