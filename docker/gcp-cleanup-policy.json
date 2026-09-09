@@ -1,0 +1,12 @@
+[
+  {
+    "name": "delete-untagged-old-images",
+    "action": {
+      "type": "DELETE"
+    },
+    "condition": {
+      "tagState": "UNTAGGED",
+      "olderThan": "7d"
+    }
+  }
+]
