@@ -50,6 +50,14 @@ Este plan describe la transición desde una arquitectura basada en VM (Monolito)
 - [x] Añadir soporte para variable de entorno `GEMINI_MODEL` y optimizar la latencia del análisis de fit (envío de texto directo, reducción del 70% de tiempo).
 - [x] Implementar desinfectador automático de comillas markdown (` ```json `) para garantizar el parseo correcto de la respuesta JSON.
 
+### Fase 4: Optimización de Costes y Auditoría
+- [x] Auditoría completa de costes en GCP (~7,50 € - 8,00 € / mes estabilizado).
+- [x] Confirmar desmantelamiento de recursos sueltos (VMs, Discos y direcciones IP antiguas).
+- [x] Auditoría de Cloud SQL (`vera-db-instance` en tier mínimo `db-f1-micro`, ~7,50 €/mes).
+- [x] Implementación de **Cleanup Policy** en Artifact Registry (`docker/gcp-cleanup-policy.json`) para purga automática de imágenes sin etiqueta de más de 7 días.
+- [x] Purga inicial de 44 imágenes obsoletas de Artifact Registry.
+- [x] Creación del manual de lecciones aprendidas y mejores prácticas de costes en [`docs/gcp-cost-optimization-learnings.md`](file:///Users/italo/Documents/GitHub/vera-hiring-tracker-cursor/docs/gcp-cost-optimization-learnings.md).
+
 ---
 
 ## Configuración de Dominios Personalizados (Cloud Run)
@@ -63,4 +71,5 @@ Ambos dominios cuentan con certificados SSL gestionados automáticamente por Goo
 
 ---
 *Rama de trabajo: deploy/gcp-cloud-run*
-*Última actualización: 2026-08-25 por Antigravity*
+*Última actualización: 2026-09-09 por Antigravity*
+

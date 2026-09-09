@@ -1,17 +1,19 @@
-# GCP Compute Engine Deployment Guide
+# GCP Deployment & Infrastructure Guide
 
-Este documento detalla la infraestructura y el proceso de despliegue de *Vera Hiring Tracker* en Google Cloud Platform (GCP).
+> [!NOTE]
+> **Migración a Serverless Completada (Septiembre 2026):**
+> La infraestructura basada en Máquina Virtual (`vera-hiring-tracker-vm` en `vera-hiring-tracker-20260504`) ha sido **retirada**. La aplicación opera actualmente en arquitectura **Serverless (Cloud Run + Cloud SQL `db-f1-micro`)** en el proyecto **`vera-serverless-20260505`**.
+> Para detalles de optimización y lecciones aprendidas de costes, consultar [`docs/gcp-cost-optimization-learnings.md`](file:///Users/italo/Documents/GitHub/vera-hiring-tracker-cursor/docs/gcp-cost-optimization-learnings.md).
 
-## 1. Detalles de la Infraestructura
+## 1. Detalles de la Infraestructura Activa (Serverless)
 
-- **Proyecto GCP:** `vera-hiring-tracker-20260504`
-- **Región/Zona:** `europe-west1-b` (Bélgica)
-- **Instancia VM:** `vera-hiring-tracker-vm`
-- **Tipo de Máquina:** `e2-small` (2 vCPU, 2 GB RAM)
-- **Disco:** 20 GB (Balanced Persistent Disk)
-- **Sistema Operativo:** Ubuntu 24.04 LTS
-- **IP Pública:** `35.241.212.0`
-- **SWAP:** 2 GB configurados para estabilidad en procesamiento de CVs.
+- **Proyecto GCP:** `vera-serverless-20260505`
+- **Región:** `europe-west1` (Bélgica)
+- **Servicios de Cómputo:** Cloud Run (`vera-api` y `vera-web`)
+- **Base de Datos:** Cloud SQL PostgreSQL 16 (`vera-db-instance`, tier `db-f1-micro`, 10 GB SSD)
+- **Almacenamiento:** Cloud Storage (`vera-hiring-tracker-cvs`)
+- **Coste Mensual Proyectado:** ~7,50 € - 8,00 € / mes
+
 
 ## 2. Configuración de Red (Firewall)
 
